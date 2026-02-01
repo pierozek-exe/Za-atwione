@@ -1,0 +1,2139 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ZAŁATWIONE — sprawy urzędowe krok po kroku</title>
+  <meta name="description" content="Sprawy urzędowe krok po kroku. Dokumenty, checklisty, terminy i kalkulatory." />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+  <style>
+    :root{
+      --bg:#f8fafc;
+      --card:#ffffff;
+      --muted:#64748b;
+      --text:#0f172a;
+      --line:#e2e8f0;
+      --accent:#0ea5e9;
+      --accent2:#8b5cf6;
+      --good:#10b981;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --shadow: 0 4px 20px rgba(0,0,0,.08);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,.12);
+      --radius: 16px;
+      --radius2: 12px;
+      --max: 1120px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0}
+    body{
+      font-family:var(--font);
+      color:var(--text);
+      background: linear-gradient(135deg, #f0f9ff 0%, #faf5ff 100%);
+      line-height:1.5;
+      letter-spacing:.2px;
+    }
+    a{color:inherit; text-decoration:none}
+    button,input,textarea,select{font:inherit}
+    .wrap{max-width:var(--max); margin:0 auto; padding:20px}
+    
+    /* Nawigacja */
+    .nav{
+      position:sticky; top:0; z-index:20;
+      background: rgba(255,255,255,.95);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--line);
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    }
+    .navInner{
+      display:flex; 
+      align-items:center; 
+      gap:14px; 
+      justify-content:space-between; 
+      max-width:var(--max); 
+      margin:0 auto; 
+      padding:14px 22px
+    }
+    .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.6px; color:var(--text)}
+    .logo{
+      width:34px;height:34px;border-radius:10px;
+      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+      box-shadow: 0 4px 12px rgba(14,165,233,.25);
+      display:grid;place-items:center;
+    }
+    .logo svg{opacity:.95; color:white}
+    .navLinks{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .chip{
+      border:1px solid var(--line);
+      background: var(--card);
+      padding:8px 14px;
+      border-radius:999px;
+      color:var(--muted);
+      transition:.2s ease;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .chip:hover{border-color:var(--accent); color:var(--accent); transform: translateY(-1px)}
+    .chip.active{border-color:var(--accent); color:var(--accent); background: rgba(14,165,233,.05)}
+    .cta{
+      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+      color:white;
+      border:0;
+      padding:10px 18px;
+      border-radius:999px;
+      font-weight:800;
+      box-shadow: 0 4px 12px rgba(14,165,233,.25);
+      cursor:pointer;
+      transition:.2s ease;
+      white-space:nowrap;
+    }
+    .cta:hover{transform: translateY(-1px); box-shadow: 0 6px 16px rgba(14,165,233,.35)}
+    
+    /* Hero */
+    .hero{padding:60px 0 40px; text-align:center}
+    .h1{
+      font-size: clamp(32px, 5vw, 56px);
+      line-height:1.1;
+      margin:0 0 16px;
+      letter-spacing:-.5px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .sub{
+      color:var(--muted); 
+      font-size: 17px; 
+      margin:0 auto 40px; 
+      max-width:60ch;
+      line-height: 1.6;
+    }
+    
+    /* Panel wyszukiwania */
+    .panel{
+      border:1px solid var(--line);
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      padding:24px;
+      margin: 0 auto;
+      max-width: 900px;
+    }
+    .searchRow{display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom: 24px}
+    .search{
+      flex:1 1 320px;
+      display:flex; gap:12px; align-items:center;
+      border:2px solid var(--line);
+      background: var(--bg);
+      border-radius: 12px;
+      padding:12px 16px;
+      transition: .2s ease;
+    }
+    .search:focus-within{
+      border-color:var(--accent);
+      box-shadow: 0 0 0 3px rgba(14,165,233,.1);
+    }
+    .search input{
+      width:100%;
+      background:transparent;
+      border:0;
+      outline:0;
+      color:var(--text);
+      font-size:15px;
+    }
+    .search input::placeholder{
+      color:var(--muted);
+    }
+    .search .kbd{
+      color:var(--muted);
+      border:1px solid var(--line);
+      padding:4px 8px;
+      border-radius:6px;
+      font-size:11px;
+      font-weight: 600;
+      background: white;
+    }
+    .ghost{
+      border:1px solid var(--line);
+      background: var(--card);
+      color:var(--text);
+      padding:12px 20px;
+      border-radius: 12px;
+      cursor:pointer;
+      transition:.2s ease;
+      font-weight:700;
+    }
+    .ghost:hover{
+      border-color:var(--accent); 
+      color:var(--accent);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(14,165,233,.15);
+    }
+    
+    /* Karty */
+    .grid3{display:grid; grid-template-columns: repeat(3, 1fr); gap:16px}
+    @media (max-width: 900px){ .grid3{grid-template-columns:1fr} }
+    .card{
+      border:1px solid var(--line);
+      background: var(--card);
+      border-radius: var(--radius2);
+      padding:20px;
+      transition:.2s ease;
+      cursor:pointer;
+      min-height:140px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .card:hover{
+      transform: translateY(-4px); 
+      border-color:var(--accent);
+      box-shadow: 0 8px 24px rgba(14,165,233,.15);
+    }
+    .card h3{margin:0 0 8px; font-size:17px; letter-spacing:-.2px; font-weight: 700}
+    .card p{margin:0; color:var(--muted); font-size:14px; line-height: 1.5; flex: 1}
+    .tagRow{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap}
+    .tag{
+      font-size:11px; 
+      color:var(--accent); 
+      border:1px solid rgba(14,165,233,.3); 
+      padding:4px 10px; 
+      border-radius:999px; 
+      background: rgba(14,165,233,.05);
+      font-weight: 600;
+    }
+    
+    .statusBadge{
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .statusBadge.inProgress{
+      background: rgba(245,158,11,.15);
+      color: var(--warn);
+      border: 1px solid rgba(245,158,11,.3);
+    }
+    .statusBadge.completed{
+      background: rgba(16,185,129,.15);
+      color: var(--good);
+      border: 1px solid rgba(16,185,129,.3);
+    }
+    
+    /* Boczny panel */
+    .sideSection{
+      max-width: 900px;
+      margin: 40px auto 0;
+    }
+    .miniTitle{
+      font-weight:800; 
+      margin:0 0 16px; 
+      font-size: 20px;
+      color: var(--text);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .clearBtn{
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      transition: .2s ease;
+    }
+    .clearBtn:hover{
+      color: var(--bad);
+      border-color: var(--bad);
+    }
+    .miniList{display:grid; gap:12px; grid-template-columns: repeat(2, 1fr)}
+    @media (max-width: 900px){ .miniList{grid-template-columns:1fr} }
+    .miniItem{
+      border:1px solid var(--line);
+      background: var(--card);
+      border-radius: var(--radius2);
+      padding:16px;
+      display:flex; 
+      align-items:flex-start; 
+      gap:12px;
+      transition: .2s ease;
+      cursor: pointer;
+      position: relative;
+    }
+    .miniItem:hover{
+      border-color:var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(14,165,233,.1);
+    }
+    .dot{
+      width:8px;
+      height:8px;
+      border-radius:99px;
+      margin-top:6px;
+      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+      flex:0 0 auto;
+    }
+    .miniItem b{display:block; font-size:14px; margin-bottom: 4px; font-weight: 700}
+    .miniItem span{display:block; color:var(--muted); font-size:12px}
+    .removeItem{
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(239,68,68,.1);
+      color: var(--bad);
+      border: 1px solid rgba(239,68,68,.2);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      opacity: 0;
+      transition: .2s ease;
+    }
+    .miniItem:hover .removeItem{
+      opacity: 1;
+    }
+    .removeItem:hover{
+      background: var(--bad);
+      color: white;
+    }
+    
+    /* Menu overlay */
+    .menuOverlay{
+      position:fixed;
+      top:0;
+      left:-100%;
+      width:100%;
+      height:100%;
+      background: rgba(0,0,0,.4);
+      z-index:30;
+      transition: .3s ease;
+      backdrop-filter: blur(4px);
+    }
+    .menuOverlay.active{
+      left:0;
+    }
+    .menuPanel{
+      position:absolute;
+      left:-320px;
+      top:0;
+      width:320px;
+      height:100%;
+      background: var(--card);
+      box-shadow: var(--shadow-lg);
+      overflow-y:auto;
+      transition: .3s ease;
+      border-right: 1px solid var(--line);
+    }
+    .menuOverlay.active .menuPanel{
+      left:0;
+    }
+    .menuHeader{
+      padding:20px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      position: sticky;
+      top: 0;
+      background: var(--card);
+      z-index: 10;
+    }
+    .menuHeader h3{
+      margin:0;
+      font-size:18px;
+      font-weight: 800;
+    }
+    .closeMenuBtn{
+      width:32px;
+      height:32px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: var(--bg);
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      color:var(--muted);
+      transition:.2s ease;
+    }
+    .closeMenuBtn:hover{
+      border-color:var(--accent);
+      color:var(--accent);
+    }
+    .menuContent{
+      padding:20px;
+    }
+    .menuSection{
+      margin-bottom:24px;
+    }
+    .menuSection h4{
+      margin:0 0 12px;
+      font-size:14px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.5px;
+      font-weight: 700;
+    }
+    .menuItem{
+      padding:12px;
+      border-radius:8px;
+      cursor:pointer;
+      transition:.2s ease;
+      margin-bottom:4px;
+      border: 1px solid transparent;
+    }
+    .menuItem:hover{
+      background:var(--bg);
+      border-color: var(--line);
+    }
+    .menuItem h5{
+      margin:0 0 4px;
+      font-size:15px;
+      font-weight: 700;
+    }
+    .menuItem p{
+      margin:0;
+      font-size:13px;
+      color:var(--muted);
+    }
+    
+    /* Modal */
+    .modalOverlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.4);
+      display:none;
+      align-items:center; justify-content:center;
+      padding:20px;
+      z-index:40;
+      backdrop-filter: blur(4px);
+    }
+    .modal{
+      width:min(980px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      border:1px solid var(--line);
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+    }
+    .modalHeader{
+      border-bottom:1px solid var(--line);
+      padding:20px 24px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      position: sticky;
+      top: 0;
+      background: var(--card);
+      z-index: 10;
+    }
+    .modalHeader h2{margin:0; font-size:22px; font-weight: 800}
+    .modalMeta{color:var(--muted); font-size:13px; margin-top:6px; font-weight: 500}
+    .closeBtn{
+      border:1px solid var(--line);
+      background: var(--bg);
+      width:36px;
+      height:36px;
+      border-radius:999px;
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      color:var(--muted);
+      transition:.2s ease;
+      flex-shrink: 0;
+    }
+    .closeBtn:hover{border-color:var(--accent); color:var(--accent)}
+    .modalBody{padding:24px; display:grid; grid-template-columns:1fr 340px; gap:24px}
+    @media (max-width: 900px){ .modalBody{grid-template-columns:1fr} }
+    .modalLeft{display:flex; flex-direction:column; gap:20px}
+    .modalRight{display:flex; flex-direction:column; gap:16px}
+    .block{
+      border:1px solid var(--line);
+      background: var(--bg);
+      border-radius: var(--radius2);
+      padding:20px;
+    }
+    .blockTitle{font-weight:800; font-size:15px; margin:0 0 16px; color: var(--text)}
+    .step{
+      display:flex; gap:12px; align-items:flex-start; padding:12px 0;
+      border-bottom:1px solid var(--line);
+    }
+    .step:last-child{border-bottom:0}
+    .num{
+      width:32px;
+      height:32px;
+      border-radius:999px;
+      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+      color:white;
+      font-weight:800;
+      font-size:14px;
+      display:grid;
+      place-items:center;
+      flex:0 0 auto;
+    }
+    .step b{display:block; font-size:15px; margin-bottom:4px; font-weight: 700}
+    .step span{display:block; color:var(--muted); font-size:13px; line-height: 1.5}
+    .check{margin-bottom:10px}
+    .check label{display:flex; align-items:flex-start; gap:10px; cursor:pointer}
+    .check input[type="checkbox"]{
+      margin-top:3px; 
+      cursor:pointer; 
+      width:18px; 
+      height:18px; 
+      accent-color: var(--accent);
+    }
+    .check .small{font-size:14px; line-height: 1.4}
+    .badge{
+      display:inline-block;
+      padding:8px 14px;
+      border-radius:999px;
+      font-weight:800;
+      font-size:12px;
+      letter-spacing:.3px;
+      margin-bottom:8px;
+    }
+    .badge.good{background:rgba(16,185,129,.15); color:var(--good); border:1px solid rgba(16,185,129,.3)}
+    .badge.warn{background:rgba(245,158,11,.15); color:var(--warn); border:1px solid rgba(245,158,11,.3)}
+    .badge.bad{background:rgba(239,68,68,.15); color:var(--bad); border:1px solid rgba(239,68,68,.3)}
+    .result{font-size:14px; color:var(--muted); line-height: 1.5}
+    .modalFooter{
+      border-top:1px solid var(--line);
+      padding:16px 24px;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      position: sticky;
+      bottom: 0;
+      background: var(--card);
+    }
+    .modalFooter button{
+      flex:1 1 auto;
+      min-width: 160px;
+    }
+    .btnPrimary{
+      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+      color:white;
+      border:0;
+      padding:12px 20px;
+      border-radius: var(--radius2);
+      font-weight:800;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+    .btnPrimary:hover{transform: translateY(-1px); box-shadow: 0 6px 16px rgba(14,165,233,.3)}
+    .btnPrimary:disabled{
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btnSecondary{
+      border:1px solid var(--line);
+      background: var(--card);
+      color:var(--text);
+      padding:12px 20px;
+      border-radius: var(--radius2);
+      cursor:pointer;
+      transition:.2s ease;
+      font-weight:700;
+    }
+    .btnSecondary:hover{
+      border-color:var(--accent); 
+      color:var(--accent);
+      transform: translateY(-1px);
+    }
+    .mistakes{
+      list-style:none;
+      padding:0;
+      margin:0;
+    }
+    .mistakes li{
+      padding:10px 0;
+      border-bottom:1px solid var(--line);
+      font-size:14px;
+      color:var(--text);
+      line-height: 1.5;
+    }
+    .mistakes li:last-child{border-bottom:0}
+    .mistakes li:before{
+      content:'⚠';
+      margin-right:10px;
+      color:var(--warn);
+    }
+    .refuseTxt, .legalTxt{
+      font-size:14px;
+      color:var(--text);
+      line-height:1.6;
+    }
+    .asOf{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:12px;
+      font-weight: 500;
+    }
+    
+    /* Form elements */
+    .formGroup{
+      margin-bottom: 16px;
+    }
+    .formLabel{
+      display: block;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+    .formInput, .formTextarea, .formSelect{
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+      color: var(--text);
+      transition: .2s ease;
+      font-size: 14px;
+    }
+    .formInput:focus, .formTextarea:focus, .formSelect:focus{
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(14,165,233,.1);
+    }
+    .formTextarea{
+      min-height: 100px;
+      resize: vertical;
+    }
+    .formHint{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    
+    /* Calculator */
+    .calcResult{
+      background: linear-gradient(135deg, rgba(14,165,233,.1), rgba(139,92,246,.1));
+      border: 2px solid var(--accent);
+      border-radius: var(--radius2);
+      padding: 20px;
+      margin-top: 20px;
+    }
+    .calcResult h4{
+      margin: 0 0 12px;
+      font-size: 16px;
+      color: var(--text);
+    }
+    .calcResult .bigNumber{
+      font-size: 32px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 8px 0;
+    }
+    .calcResult p{
+      margin: 8px 0 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    
+    /* Empty state */
+    .emptyState{
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+    .emptyState svg{
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+      padding: 8px;
+    }
+    .hamburger span {
+      width: 22px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: .2s ease;
+    }
+    @media (max-width: 768px) {
+      .hamburger {
+        display: flex;
+      }
+      .navLinks .chip:not(.mobile-visible) {
+        display: none;
+      }
+    }
+    
+    /* Tabs */
+    .tabs{
+      display: flex;
+      gap: 8px;
+      border-bottom: 2px solid var(--line);
+      margin-bottom: 20px;
+    }
+    .tab{
+      padding: 12px 20px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 700;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: .2s ease;
+    }
+    .tab:hover{
+      color: var(--text);
+    }
+    .tab.active{
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    
+    .tabContent{
+      display: none;
+    }
+    .tabContent.active{
+      display: block;
+    }
+    
+    /* Success message */
+    .successMessage{
+      background: rgba(16,185,129,.1);
+      border: 1px solid rgba(16,185,129,.3);
+      color: var(--good);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+    }
+    .successMessage.show{
+      display: flex;
+    }
+  </style>
+</head>
+<body>
+
+<div class="menuOverlay" id="menuOverlay">
+  <div class="menuPanel">
+    <div class="menuHeader">
+      <h3>Menu</h3>
+      <button class="closeMenuBtn" id="closeMenu">✕</button>
+    </div>
+    <div class="menuContent">
+      <div class="menuSection">
+        <h4>Dokumenty i Formalności</h4>
+        <div class="menuItem" data-open="dowod">
+          <h5>Wymiana dowodu</h5>
+          <p>Krok po kroku: dokumenty, opłaty</p>
+        </div>
+        <div class="menuItem" data-open="najmu">
+          <h5>Umowa najmu</h5>
+          <p>Przygotuj umowę, dokumenty</p>
+        </div>
+        <div class="menuItem" data-open="reklamacja">
+          <h5>Reklamacja towaru</h5>
+          <p>Generator pisma, dowody</p>
+        </div>
+      </div>
+      
+      <div class="menuSection">
+        <h4>Podatki</h4>
+        <div class="menuItem" data-open="pit0">
+          <h5>PIT-0 — ulga dla młodych</h5>
+          <p>Sprawdź warunki i generuj</p>
+        </div>
+        <div class="menuItem" data-open="deklaracjaPIT">
+          <h5>Deklaracja PIT</h5>
+          <p>Przygotuj i złóż zeznanie</p>
+        </div>
+      </div>
+      
+      <div class="menuSection">
+        <h4>Inne</h4>
+        <div class="menuItem" data-open="wypowiedzenie">
+          <h5>Wypowiedzenie subskrypcji</h5>
+          <p>Szybkie wypowiedzenie</p>
+        </div>
+        <div class="menuItem" data-open="youngStarter">
+          <h5>Młody starter (18-25)</h5>
+          <p>Pakiet startowy</p>
+        </div>
+      </div>
+      
+      <div class="menuSection">
+        <h4>Narzędzia</h4>
+        <div class="menuItem" data-view="calculator">
+          <h5>Kalkulatory</h5>
+          <p>Oblicz koszty i terminy</p>
+        </div>
+        <div class="menuItem" data-view="calendar">
+          <h5>Kalendarz</h5>
+          <p>Dodaj terminy do kalendarza</p>
+        </div>
+        <div class="menuItem" data-view="panel">
+          <h5>Mój panel</h5>
+          <p>Twoje sprawy i postępy</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="nav">
+  <div class="navInner">
+    <div class="brand">
+      <div class="logo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <span>ZAŁATWIONE</span>
+    </div>
+    <div class="navLinks">
+      <div class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <a href="#" class="chip mobile-visible" id="menuBtn">Menu</a>
+      <a href="#" class="chip" id="panelBtn">Mój panel</a>
+      <a href="#" class="chip" id="calcBtn">Kalkulatory</a>
+      <a href="#" class="chip" id="calendarBtn">Kalendarz</a>
+      <button class="cta" id="homeBtn">Strona główna</button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+  <div id="viewHome">
+    <section class="hero">
+      <h1 class="h1">Sprawy urzędowe — krok po kroku.</h1>
+      <p class="sub">
+        Dokumenty, checklisty, terminy i kalkulatory. Wszystko w jednym miejscu.
+        Wypełnij pola, wygeneruj dokument i masz załatwione.
+      </p>
+      
+      <div class="panel">
+        <div class="searchRow">
+          <div class="search">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input type="text" id="q" placeholder="np. PIT, wypowiedzenie, ubezpieczenie, dowód…" />
+            <span class="kbd">⏎</span>
+          </div>
+          <button class="ghost" id="searchBtn">Szukaj</button>
+        </div>
+        
+        <div class="grid3">
+          <div class="card" data-open="pit0">
+            <h3>PIT-0</h3>
+            <p>Ulga dla młodych — sprawdź warunki i generuj dokumenty.</p>
+            <div class="tagRow">
+              <span class="tag">Podatki</span>
+            </div>
+          </div>
+          <div class="card" data-open="ubezpieczenie">
+            <h3>Ubezpieczenie NFZ</h3>
+            <p>Czy jesteś objęty? Sprawdź i załóż konto.</p>
+            <div class="tagRow">
+              <span class="tag">Zdrowie</span>
+            </div>
+          </div>
+          <div class="card" data-open="dowod">
+            <h3>Wymiana dowodu</h3>
+            <p>Krok po kroku: dokumenty, opłaty, miejsca.</p>
+            <div class="tagRow">
+              <span class="tag">Dokumenty</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sideSection">
+      <h2 class="miniTitle">
+        Ostatnie sprawy
+        <button class="clearBtn" id="clearHistory">Wyczyść historię</button>
+      </h2>
+      <div class="miniList" id="recentCases">
+        </div>
+    </section>
+  </div>
+
+  <div id="viewCalculator" style="display:none">
+    <section style="max-width: 800px; margin: 40px auto;">
+      <h1 class="h1" style="text-align:left; font-size: 32px; margin-bottom: 10px">Kalkulatory</h1>
+      <p class="sub" style="text-align:left; margin-bottom: 40px">Oblicz koszty, terminy i sprawdź swoje obowiązki</p>
+      
+      <div class="tabs">
+        <button class="tab active" data-tab="calcPit">Kalkulator PIT-0</button>
+        <button class="tab" data-tab="calcDeadline">Kalkulator terminów</button>
+        <button class="tab" data-tab="calcCost">Kalkulator kosztów</button>
+      </div>
+      
+      <div class="tabContent active" id="calcPit">
+        <div class="panel">
+          <h3 style="margin-top:0">Sprawdź uprawnienia do PIT-0</h3>
+          <div class="formGroup">
+            <label class="formLabel">Rok urodzenia</label>
+            <input type="number" class="formInput" id="pitBirthYear" placeholder="np. 2000" />
+          </div>
+          <div class="formGroup">
+            <label class="formLabel">Roczne przychody (PLN)</label>
+            <input type="number" class="formInput" id="pitIncome" placeholder="np. 45000" />
+            <div class="formHint">Limit to 85 528 PLN rocznie</div>
+          </div>
+          <div class="formGroup">
+            <label class="formLabel">Źródło przychodu</label>
+            <select class="formSelect" id="pitSource">
+              <option value="">-- wybierz --</option>
+              <option value="employment">Umowa o pracę</option>
+              <option value="contract">Umowa zlecenie</option>
+              <option value="business">Działalność gospodarcza</option>
+              <option value="other">Inne</option>
+            </select>
+          </div>
+          <button class="btnPrimary" id="calculatePit">Oblicz</button>
+          <div id="pitResult"></div>
+        </div>
+      </div>
+      
+      <div class="tabContent" id="calcDeadline">
+        <div class="panel">
+          <h3 style="margin-top:0">Kalkulator terminów urzędowych</h3>
+          <div class="formGroup">
+            <label class="formLabel">Typ sprawy</label>
+            <select class="formSelect" id="deadlineType">
+              <option value="pit">Złożenie PIT</option>
+              <option value="dowod">Wymiana dowodu (przed wygaśnięciem)</option>
+              <option value="reklamacja">Reklamacja (od zakupu)</option>
+              <option value="wypowiedzenie">Wypowiedzenie umowy</option>
+            </select>
+          </div>
+          <div class="formGroup">
+            <label class="formLabel">Data początkowa</label>
+            <input type="date" class="formInput" id="deadlineStart" />
+          </div>
+          <button class="btnPrimary" id="calculateDeadline">Oblicz termin</button>
+          <div id="deadlineResult"></div>
+        </div>
+      </div>
+      
+      <div class="tabContent" id="calcCost">
+        <div class="panel">
+          <h3 style="margin-top:0">Kalkulator kosztów spraw urzędowych</h3>
+          <div class="formGroup">
+            <label class="formLabel">Typ sprawy</label>
+            <select class="formSelect" id="costType">
+              <option value="dowod">Wymiana dowodu osobistego</option>
+              <option value="paszport">Paszport</option>
+              <option value="najmu">Umowa najmu (notariusz)</option>
+              <option value="aktystan">Akt stanu cywilnego</option>
+            </select>
+          </div>
+          <div class="formGroup" id="costExtraGroup" style="display:none">
+            <label class="formLabel">Opcje dodatkowe</label>
+            <label><input type="checkbox" id="costExpress" /> Ekspresowe</label>
+          </div>
+          <button class="btnPrimary" id="calculateCost">Oblicz koszt</button>
+          <div id="costResult"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="viewCalendar" style="display:none">
+    <section style="max-width: 800px; margin: 40px auto;">
+      <h1 class="h1" style="text-align:left; font-size: 32px; margin-bottom: 10px">Kalendarz</h1>
+      <p class="sub" style="text-align:left; margin-bottom: 40px">Dodaj terminy urzędowe do swojego kalendarza (Google, Apple, Outlook)</p>
+      
+      <div class="panel">
+        <h3 style="margin-top:0">Dodaj przypomnienie</h3>
+        <div class="formGroup">
+          <label class="formLabel">Rodzaj sprawy</label>
+          <select class="formSelect" id="calType">
+            <option value="pit">Złożenie PIT (termin: 30.04)</option>
+            <option value="odwolanie14">Odwołanie od decyzji (+14 dni)</option>
+            <option value="kpa30">Odpowiedź urzędu (KPA +30 dni)</option>
+            <option value="dowod">Wymiana dowodu (+30 dni)</option>
+            <option value="wypowiedzenie">Wypowiedzenie umowy (+1 mies.)</option>
+          </select>
+        </div>
+        
+        <div class="formGroup">
+          <label class="formLabel">Data zdarzenia (np. otrzymania pisma)</label>
+          <input type="date" class="formInput" id="calStartDate" />
+        </div>
+        
+        <button class="btnPrimary" id="calCalcBtn">Oblicz termin</button>
+        
+        <div id="calResult" style="display:none; margin-top:24px; padding:20px; background: #f0fdf4; border:1px solid #bbf7d0; border-radius:12px;">
+          <h4 style="margin:0; color:#166534" id="calTitleText"></h4>
+          <p style="font-size:24px; font-weight:800; color:#15803d; margin: 8px 0 16px" id="calDateText"></p>
+          <p style="font-size:14px; color:#166534; margin-bottom:16px">Kliknij poniżej, aby pobrać plik i dodać go do kalendarza w telefonie/komputerze.</p>
+          <button class="btnPrimary" id="calDownloadBtn" style="background: #16a34a;">📅 Dodaj do kalendarza</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="viewPanel" style="display:none">
+    <section style="max-width: 900px; margin: 40px auto;">
+      <h1 class="h1" style="text-align:left; font-size: 32px; margin-bottom: 10px">Mój panel</h1>
+      <p class="sub" style="text-align:left; margin-bottom: 40px">Twoje sprawy, postępy i zapisane checklisty</p>
+      
+      <div class="panel">
+        <h3 style="margin-top:0">Sprawy w toku</h3>
+        <div class="grid3" id="myCases">
+          </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="modalOverlay" id="overlay">
+  <div class="modal">
+    <div class="modalHeader">
+      <div>
+        <h2 id="modalTitle">Tytuł sprawy</h2>
+        <div class="modalMeta" id="modalMeta">Czas • Koszt • Termin</div>
+      </div>
+      <button class="closeBtn" id="closeModal" aria-label="Zamknij">✕</button>
+    </div>
+    <div class="modalBody">
+      <div class="modalLeft">
+        <div class="block">
+          <h3 class="blockTitle">Kroki do wykonania</h3>
+          <div id="modalSteps"></div>
+        </div>
+        <div class="block">
+          <h3 class="blockTitle">⚠ Najczęstsze błędy</h3>
+          <ul class="mistakes" id="mistakes"></ul>
+        </div>
+        <div class="block">
+          <h3 class="blockTitle">🚫 Co jeśli odmówią?</h3>
+          <p class="refuseTxt" id="refuse"></p>
+        </div>
+        <div class="block">
+          <h3 class="blockTitle">⚖ Podstawa prawna</h3>
+          <p class="legalTxt" id="legal"></p>
+          <p class="asOf">Stan prawny na dzień: <span id="modalAsOf"></span></p>
+        </div>
+        
+        <div class="block" id="docGeneratorBlock" style="display:none">
+          <h3 class="blockTitle">📄 Generator dokumentu</h3>
+          <div class="formGroup">
+            <label class="formLabel">Twoje imię i nazwisko</label>
+            <input type="text" class="formInput" id="docName" placeholder="Jan Kowalski" />
+          </div>
+          <div class="formGroup">
+            <label class="formLabel">Adres</label>
+            <input type="text" class="formInput" id="docAddress" placeholder="ul. Przykładowa 1, 00-000 Warszawa" />
+          </div>
+          <div class="formGroup" id="docExtraFields">
+            </div>
+          <button class="btnPrimary" id="generateDoc">Generuj dokument</button>
+          <div class="successMessage" id="docSuccess">
+            ✓ Dokument wygenerowany! Sprawdź pobrany plik.
+          </div>
+        </div>
+      </div>
+      <div class="modalRight">
+        <div class="block">
+          <h3 class="blockTitle">Sprawdź swój przypadek</h3>
+          <div id="checks"></div>
+        </div>
+        <div class="block">
+          <h3 class="blockTitle">Wynik</h3>
+          <div class="badge warn" id="badge">NIE TERAZ</div>
+          <p class="result" id="resultText">Zaznacz opcje powyżej, żeby zobaczyć wynik.</p>
+        </div>
+      </div>
+    </div>
+    <div class="modalFooter">
+      <button class="btnPrimary" id="genDocBtn">Wypełnij formularz</button>
+      <button class="btnSecondary" id="addToPanelBtn">Dodaj do mojego panelu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============= DATA =============
+const DATA = {
+  pit0: {
+    title: "PIT-0 — ulga dla młodych",
+    meta: { time: "8 min", cost: "0 zł", deadline: "30 kwi 2025" },
+    steps: [
+      ["Sprawdź warunki", "Czy jesteś do 26 roku życia? Jaki rodzaj przychodu?"],
+      ["Złóż PIT-0 w urzędzie skarbowym", "Elektronicznie lub osobiście."],
+      ["Czekaj na decyzję", "Zwykle 1–2 miesiące."]
+    ],
+    checks: [
+      "Mam poniżej 26 lat",
+      "Przychody z pracy/zlecenia",
+      "Nie przekroczyłem limitu",
+      "Chcę tylko sprawdzić warunki"
+    ],
+    mistakes: [
+      "Zakładanie, że każdy poniżej 26 lat ma prawo do ulgi.",
+      "Brak sprawdzenia limitu dochodów.",
+      "Zostawianie na ostatni dzień — termin to 30 kwietnia."
+    ],
+    refuse: "Jeśli urząd odmówi: sprawdź decyzję, odwołaj się w 14 dni, załącz dokumenty.",
+    legal: "Ustawa o PIT, art. 21 ust. 1 pkt 148 - zwolnienie z podatku dla osób do 26. roku życia.",
+    docFields: {
+      pesel: "PESEL",
+      nip: "NIP (jeśli posiadasz)",
+      urzadSkarbowy: "Nazwa urzędu skarbowego"
+    }
+  },
+  ubezpieczenie: {
+    title: "Ubezpieczenie NFZ",
+    meta: { time: "5 min", cost: "0 zł", deadline: "n/d" },
+    steps: [
+      ["Sprawdź status", "Student? Praca? Zgłoszenie rodzica?"],
+      ["Załóż profil PUE ZUS", "Weryfikacja przez ePUAP lub bankowość."],
+      ["Sprawdź zgłoszenia", "Historia ubezpieczenia w systemie ZUS."]
+    ],
+    checks: [
+      "Jestem studentem",
+      "Mam pracę",
+      "Rodzic mnie zgłosił",
+      "Nie mam żadnego z powyższych"
+    ],
+    mistakes: [
+      "Zakładanie, że student ma automatyczne ubezpieczenie bez studiowania.",
+      "Brak weryfikacji w systemie ZUS.",
+      "Myślenie, że brak składki = brak NFZ."
+    ],
+    refuse: "Jeśli nie widać ubezpieczenia: zgłoś się do ZUS, dostarczy historię lub wskaże kto powinien Cię zgłosić.",
+    legal: "Ustawa o świadczeniach opieki zdrowotnej finansowanych ze środków publicznych."
+  },
+  dowod: {
+    title: "Wymiana dowodu osobistego",
+    meta: { time: "12 min", cost: "~60 zł", deadline: "30 dni przed wygaśnięciem" },
+    steps: [
+      ["Przygotuj zdjęcie", "Biometryczne, aktualne."],
+      ["Umów termin w urzędzie", "Przez internet lub telefonicznie."],
+      ["Odbierz nowy dowód", "Zazwyczaj 30 dni."]
+    ],
+    checks: [
+      "Mam aktualne zdjęcie",
+      "Wiem, gdzie mój urząd",
+      "Mam przy sobie stary dowód",
+      "Chcę tylko sprawdzić procedurę"
+    ],
+    mistakes: [
+      "Zostawianie na ostatnią chwilę.",
+      "Brak aktualnego zdjęcia biometrycznego.",
+      "Myślenie, że dowód można odbierać tylko w urzędzie wydającym."
+    ],
+    refuse: "Jeśli urząd odmówi wydania: sprawdź braki dokumentów, złóż ponownie lub odwołaj się do wójta/burmistrza.",
+    legal: "Ustawa o dowodach osobistych z dnia 6 sierpnia 2010 r.",
+    docFields: {
+      pesel: "PESEL",
+      dataUrodzenia: "Data urodzenia",
+      miejsceUrodzenia: "Miejsce urodzenia"
+    }
+  },
+  reklamacja: {
+    title: "Reklamacja towaru",
+    meta: { time: "10 min", cost: "0 zł", deadline: "2 lata od zakupu" },
+    steps: [
+      ["Przygotuj dowód zakupu", "Paragon, faktura, wyciąg z karty."],
+      ["Napisz pismo reklamacyjne", "Opisz problem, załącz zdjęcia."],
+      ["Złóż reklamację", "Osobiście lub pocztą/kurierem."],
+      ["Czekaj na odpowiedź", "Sprzedawca ma 14 dni."]
+    ],
+    checks: [
+      "Mam dowód zakupu",
+      "Towar jest wadliwy",
+      "Nie minęły 2 lata",
+      "Chcę wygenerować pismo"
+    ],
+    mistakes: [
+      "Brak dowodu zakupu — sprzedawca może zażądać.",
+      "Myślenie, że reklamacja to zwrot towaru.",
+      "Brak żądania pisemnej odpowiedzi."
+    ],
+    refuse: "Jeśli odrzucą: poproś o uzasadnienie, pismo do rzecznika praw konsumenta lub pozew do sądu.",
+    legal: "Kodeks cywilny art. 556 i nast., ustawa o prawach konsumenta.",
+    docFields: {
+      dataZakupu: "Data zakupu",
+      produktNazwa: "Nazwa produktu",
+      opisWady: "Opis wady",
+      sprzedawcaNazwa: "Nazwa sprzedawcy",
+      sprzedawcaAdres: "Adres sprzedawcy"
+    }
+  },
+  najmu: {
+    title: "Umowa najmu",
+    meta: { time: "15 min", cost: "~0-100 zł", deadline: "przed wprowadzeniem" },
+    steps: [
+      ["Ustal warunki", "Czynsz, media, kaucja, okres."],
+      ["Przygotuj umowę", "Wygeneruj wzór lub skorzystaj z notariusza."],
+      ["Podpisz i zarejestruj", "Urząd skarbowy (jeśli wymagane)."],
+      ["Protokół zdawczo-odbiorczy", "Stan mieszkania na zdjęciach + liczniki."]
+    ],
+    checks: [
+      "Znam czynsz i media",
+      "Chcę umowę na czas określony",
+      "Wynajmuję od osoby prywatnej",
+      "Chcę gotowy wzór umowy"
+    ],
+    mistakes: [
+      "Brak protokołu zdawczo-odbiorczego.",
+      "Nieustalenie zasad zwrotu kaucji.",
+      "Podpisywanie bez czytania."
+    ],
+    refuse: "Jeśli właściciel odmawia umowy na piśmie: to red flag — szukaj innego mieszkania lub wymagaj umowy.",
+    legal: "Kodeks cywilny art. 659 i nast.",
+    docFields: {
+      wynajmujacyImie: "Wynajmujący - imię i nazwisko",
+      najemcaImie: "Najemca - imię i nazwisko",
+      adresMieszkania: "Adres mieszkania",
+      czynsz: "Czynsz miesięczny (PLN)",
+      kaucja: "Kaucja (PLN)",
+      dataOd: "Data od",
+      dataDo: "Data do (opcjonalnie)"
+    }
+  },
+  deklaracjaPIT: {
+    title: "Deklaracja PIT",
+    meta: { time: "20 min", cost: "0 zł", deadline: "30 kwi 2025" },
+    steps: [
+      ["Zbierz PIT-y od pracodawców", "PIT-11, PIT-8C, itp."],
+      ["Wypełnij zeznanie", "Ręcznie, program e-pity, usługa twój e-PIT."],
+      ["Złóż deklarację", "Elektronicznie lub w urzędzie skarbowym."],
+      ["Czekaj na zwrot lub zapłać", "ZUS, konto bankowe."]
+    ],
+    checks: [
+      "Miałem dochód z pracy/zlecenia",
+      "Nie miałem dochodu",
+      "Mam działalność",
+      "Chcę tylko sprawdzić obowiązek"
+    ],
+    mistakes: [
+      "Zakładanie, że brak dochodu = zawsze brak obowiązku.",
+      "Brak korekty gdy były błędy.",
+      "Zostawianie na ostatni dzień."
+    ],
+    refuse: "Jeśli urząd wzywa: sprawdź termin i uzupełnij braki; wygeneruj odpowiedź/wyjaśnienie.",
+    legal: "Ustawa o podatku dochodowym od osób fizycznych."
+  },
+  wypowiedzenie: {
+    title: "Wypowiedzenie subskrypcji",
+    meta: { time: "4 min", cost: "0 zł", deadline: "zależnie od regulaminu" },
+    steps: [
+      ["Wybierz usługę", "Streaming/apka/siłownia/inne."],
+      ["Wygeneruj wypowiedzenie", "Z datą i żądaniem potwierdzenia."],
+      ["Zachowaj dowód", "Mail/potwierdzenie płatności."]
+    ],
+    checks: [
+      "Znam mail do kontaktu",
+      "Mam potwierdzenie płatności",
+      "Chcę zakończyć od kolejnego okresu",
+      "Chcę gotowy tekst wiadomości"
+    ],
+    mistakes: [
+      "Brak żądania potwierdzenia wypowiedzenia.",
+      "Rezygnacja przez zły kanał.",
+      "Brak dowodu wysłania."
+    ],
+    refuse: "Jeśli odrzucą: poproś o podstawę, wskaż regulamin i wyślij ponownie właściwą drogą.",
+    legal: "Ustawa o prawach konsumenta - prawo do odstąpienia od umowy.",
+    docFields: {
+      usługaNazwa: "Nazwa usługi",
+      numerUmowy: "Numer umowy/konta",
+      dataRozpoczecia: "Data rozpoczęcia usługi",
+      emailKontaktowy: "Email kontaktowy firmy"
+    }
+  },
+  youngStarter: {
+    title: "Młody starter (18-25) — pakiet",
+    meta: { time: "30 min", cost: "zależnie", deadline: "różnie" },
+    steps: [
+      ["Profil PUE ZUS", "Dostęp do ubezpieczenia i historii."],
+      ["Sprawdź NFZ", "Student? Praca? Rodzic?"],
+      ["PIT-0 (jeśli do 26)", "Ulga podatkowa."],
+      ["Umowa najmu/zlecenia", "Dokumenty i wzory."],
+      ["Konto bankowe", "Z kartą i dostępem online."]
+    ],
+    checks: [
+      "Kończę studia lub już pracuję",
+      "Wynajmuję mieszkanie",
+      "Chcę uporządkować dokumenty",
+      "Chcę sprawdzić obowiązki podatkowe"
+    ],
+    mistakes: [
+      "Brak świadomości obowiązków podatkowych.",
+      "Zakładanie, że student ma automatyczne ubezpieczenie.",
+      "Podpisywanie umów bez czytania."
+    ],
+    refuse: "Jeśli któraś instytucja odmawia: sprawdź braki, uzupełnij dokumenty, odwołaj się.",
+    legal: "Zbiorczo: ustawa o PIT, ZUS, Kodeks cywilny (najem), ustawa o prawach konsumenta."
+  }
+};
+
+// ============= STORAGE HELPERS =============
+const Storage = {
+  saveCases(cases) {
+    localStorage.setItem('myCases', JSON.stringify(cases));
+  },
+  getCases() {
+    const data = localStorage.getItem('myCases');
+    return data ? JSON.parse(data) : [];
+  },
+  addCase(caseData) {
+    const cases = this.getCases();
+    const exists = cases.find(c => c.id === caseData.id);
+    if (!exists) {
+      cases.push(caseData);
+      this.saveCases(cases);
+    }
+  },
+  removeCase(id) {
+    let cases = this.getCases();
+    cases = cases.filter(c => c.id !== id);
+    this.saveCases(cases);
+  },
+  updateCase(id, updates) {
+    const cases = this.getCases();
+    const idx = cases.findIndex(c => c.id === id);
+    if (idx !== -1) {
+      cases[idx] = { ...cases[idx], ...updates };
+      this.saveCases(cases);
+    }
+  },
+  saveHistory(item) {
+    const history = this.getHistory();
+    // Remove duplicates
+    const filtered = history.filter(h => h.key !== item.key);
+    filtered.unshift(item);
+    // Keep last 10
+    const limited = filtered.slice(0, 10);
+    localStorage.setItem('recentCases', JSON.stringify(limited));
+  },
+  getHistory() {
+    const data = localStorage.getItem('recentCases');
+    return data ? JSON.parse(data) : [];
+  },
+  clearHistory() {
+    localStorage.removeItem('recentCases');
+  }
+};
+
+// ============= UI STATE =============
+let currentView = 'home';
+let currentCase = null;
+
+// ============= ELEMENTS =============
+const overlay = document.getElementById('overlay');
+const closeModal = document.getElementById('closeModal');
+const modalTitle = document.getElementById('modalTitle');
+const modalMeta = document.getElementById('modalMeta');
+const modalSteps = document.getElementById('modalSteps');
+const checks = document.getElementById('checks');
+const badge = document.getElementById('badge');
+const resultText = document.getElementById('resultText');
+const mistakes = document.getElementById('mistakes');
+const refuse = document.getElementById('refuse');
+const legal = document.getElementById('legal');
+const menuOverlay = document.getElementById('menuOverlay');
+
+// ============= INIT =============
+const asOf = new Date().toLocaleDateString('pl-PL', { year:'numeric', month:'long', day:'numeric' });
+document.getElementById('modalAsOf').textContent = asOf;
+
+renderRecentCases();
+renderMyCases();
+
+// ============= VIEW SWITCHING =============
+function switchView(view) {
+  currentView = view;
+  document.getElementById('viewHome').style.display = view === 'home' ? 'block' : 'none';
+  document.getElementById('viewCalculator').style.display = view === 'calculator' ? 'block' : 'none';
+  document.getElementById('viewPanel').style.display = view === 'panel' ? 'block' : 'none';
+  document.getElementById('viewCalendar').style.display = view === 'calendar' ? 'block' : 'none';
+  
+  // Update nav
+  document.querySelectorAll('.navLinks .chip').forEach(c => c.classList.remove('active'));
+  if (view === 'panel') document.getElementById('panelBtn')?.classList.add('active');
+  if (view === 'calculator') document.getElementById('calcBtn')?.classList.add('active');
+  if (view === 'calendar') document.getElementById('calendarBtn')?.classList.add('active');
+  
+  if (view === 'panel') renderMyCases();
+}
+
+document.getElementById('homeBtn').addEventListener('click', () => switchView('home'));
+document.getElementById('panelBtn')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  switchView('panel');
+});
+document.getElementById('calcBtn')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  switchView('calculator');
+});
+document.getElementById('calendarBtn')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  switchView('calendar');
+});
+
+// ============= MENU =============
+document.getElementById('menuBtn').addEventListener('click', (e) => {
+  e.preventDefault();
+  menuOverlay.classList.add('active');
+});
+
+document.getElementById('hamburger').addEventListener('click', () => {
+  menuOverlay.classList.add('active');
+});
+
+document.getElementById('closeMenu').addEventListener('click', () => {
+  menuOverlay.classList.remove('active');
+});
+
+menuOverlay.addEventListener('click', (e) => {
+  if(e.target === menuOverlay) menuOverlay.classList.remove('active');
+});
+
+// Menu items
+document.querySelectorAll('.menuItem[data-view]').forEach(item => {
+  item.addEventListener('click', () => {
+    const view = item.dataset.view;
+    switchView(view);
+    menuOverlay.classList.remove('active');
+  });
+});
+
+// ============= MODAL =============
+function openCase(key) {
+  const c = DATA[key];
+  if(!c) return;
+  
+  currentCase = key;
+
+  modalTitle.textContent = c.title;
+  modalMeta.textContent = `Czas: ${c.meta.time} • Koszt: ${c.meta.cost} • Termin: ${c.meta.deadline}`;
+
+  // Steps
+  modalSteps.innerHTML = '';
+  c.steps.forEach((s, i) => {
+    const el = document.createElement('div');
+    el.className = 'step';
+    el.innerHTML = `
+      <div class="num">${i+1}</div>
+      <div><b>${escapeHtml(s[0])}</b><span>${escapeHtml(s[1])}</span></div>
+    `;
+    modalSteps.appendChild(el);
+  });
+
+  // Checks
+  checks.innerHTML = '';
+  c.checks.forEach((t, i) => {
+    const box = document.createElement('div');
+    box.className = 'check';
+    box.innerHTML = `
+      <label>
+        <input type="checkbox" data-i="${i}" />
+        <span class="small">${escapeHtml(t)}</span>
+      </label>
+    `;
+    checks.appendChild(box);
+  });
+
+  // Mistakes
+  mistakes.innerHTML = '';
+  c.mistakes.forEach(m => {
+    const li = document.createElement('li');
+    li.textContent = m;
+    mistakes.appendChild(li);
+  });
+
+  refuse.textContent = c.refuse;
+  legal.textContent = c.legal;
+
+  // Document generator
+  const docBlock = document.getElementById('docGeneratorBlock');
+  const extraFields = document.getElementById('docExtraFields');
+  extraFields.innerHTML = '';
+  
+  if (c.docFields) {
+    Object.entries(c.docFields).forEach(([fieldKey, label]) => {
+      const div = document.createElement('div');
+      div.className = 'formGroup';
+      div.innerHTML = `
+        <label class="formLabel">${label}</label>
+        <input type="text" class="formInput" id="doc_${fieldKey}" />
+      `;
+      extraFields.appendChild(div);
+    });
+  }
+  
+  docBlock.style.display = 'none';
+
+  setResult('warn', 'NIE TERAZ', 'Zaznacz opcje po prawej, żeby zobaczyć wynik.');
+
+  overlay.style.display = 'flex';
+  menuOverlay.classList.remove('active');
+  
+  // Save to history
+  Storage.saveHistory({
+    key: key,
+    title: c.title,
+    timestamp: Date.now()
+  });
+  renderRecentCases();
+}
+
+function setResult(kind, label, text) {
+  badge.className = `badge ${kind}`;
+  badge.textContent = label;
+  resultText.textContent = text;
+}
+
+function computeDemoResult(key, checkedCount, checked) {
+  if(key === 'ubezpieczenie'){
+    if(checked[3]) return ['bad','NIE','Wygląda na brak ubezpieczenia. Sprawdź, kto powinien Cię zgłosić i przejdź procedurę.'];
+    if(checked[0] || checked[1] || checked[2]) return ['good','TAK','Prawdopodobnie masz ubezpieczenie. Zapisz sprawę i sprawdź kroki weryfikacji.'];
+    return ['warn','NIE TERAZ','Zaznacz swój status (student/praca/zgłoszenie).'];
+  }
+
+  if(key === 'pit0'){
+    if(checked[0] && checked[1]) return ['good','TAK','Spełniasz podstawowe warunki. Przejdź kroki i wygeneruj potrzebne dokumenty.'];
+    if(checked[0] && !checked[1]) return ['warn','NIE TERAZ','Sprawdź rodzaj przychodu. Ulga zależy od źródła dochodu.'];
+    if(!checked[0] && checkedCount>=2) return ['bad','NIE','Jeśli masz 26+ lat, PIT-0 nie dotyczy. Zobacz alternatywne ulgi.'];
+    return ['warn','NIE TERAZ','Zaznacz wiek i typ przychodu.'];
+  }
+
+  if(key === 'youngStarter'){
+    if(checkedCount>=2) return ['good','TAK','Super. Wygenerujemy listę spraw (profil, ubezpieczenie, podatki, umowy) i terminy.'];
+    if(checkedCount===1) return ['warn','NIE TERAZ','Zaznacz jeszcze 1 obszar (studia/praca/wynajem/podatki), żeby dopasować listę.'];
+    return ['warn','NIE TERAZ','Wybierz, co Cię dotyczy.'];
+  }
+
+  if(checkedCount>=2) return ['good','TAK','OK. Przejdź kroki i wygeneruj dokument.'];
+  if(checkedCount===1) return ['warn','NIE TERAZ','Dodaj jeszcze 1 informację, żeby doprecyzować.'];
+  return ['warn','NIE TERAZ','Zaznacz opcje po prawej, żeby zobaczyć wynik.'];
+}
+
+// ============= EVENTS =============
+document.addEventListener('click', (e) => {
+  const card = e.target.closest('.card');
+  if(card && card.dataset.open){
+    openCase(card.dataset.open);
+    return;
+  }
+  
+  const menuItem = e.target.closest('.menuItem');
+  if(menuItem && menuItem.dataset.open){
+    openCase(menuItem.dataset.open);
+    return;
+  }
+  
+  const miniItem = e.target.closest('.miniItem');
+  if(miniItem && miniItem.dataset.open){
+    openCase(miniItem.dataset.open);
+    return;
+  }
+  
+  const removeBtn = e.target.closest('.removeItem');
+  if (removeBtn) {
+    e.stopPropagation();
+    const id = removeBtn.dataset.id;
+    Storage.removeCase(id);
+    renderMyCases();
+    return;
+  }
+});
+
+closeModal.addEventListener('click', () => overlay.style.display = 'none');
+overlay.addEventListener('click', (e) => { 
+  if(e.target === overlay) overlay.style.display = 'none';
+});
+
+window.addEventListener('keydown', (e) => { 
+  if(e.key === 'Escape') {
+    overlay.style.display = 'none';
+    menuOverlay.classList.remove('active');
+  }
+});
+
+checks.addEventListener('change', () => {
+  const key = currentCase;
+  const inputs = [...checks.querySelectorAll('input[type="checkbox"]')];
+  const checked = inputs.map(i => i.checked);
+  const checkedCount = checked.filter(Boolean).length;
+
+  const [kind, label, text] = computeDemoResult(key, checkedCount, checked);
+  setResult(kind, label, text);
+});
+
+// ============= SEARCH =============
+function searchOpen(q) {
+  const s = q.toLowerCase().trim();
+  const map = [
+    ['pit', 'pit0'], ['pit-0','pit0'], ['ulga','pit0'],
+    ['wypowied', 'wypowiedzenie'], ['siłown', 'wypowiedzenie'], ['internet','wypowiedzenie'],
+    ['nfz','ubezpieczenie'], ['ubezpiec','ubezpieczenie'],
+    ['reklam', 'reklamacja'],
+    ['dowód','dowod'], ['dowod','dowod'],
+    ['wynajem','najmu'], ['mieszkan','najmu'],
+    ['18','youngStarter'], ['19','youngStarter'], ['20','youngStarter'], ['student','youngStarter']
+  ];
+  const found = map.find(([k]) => s.includes(k));
+  openCase(found ? found[1] : 'pit0');
+}
+
+const qInput = document.getElementById('q');
+document.getElementById('searchBtn').addEventListener('click', () => searchOpen(qInput.value));
+qInput.addEventListener('keydown', (e) => { 
+  if(e.key === 'Enter') searchOpen(qInput.value);
+});
+
+// ============= DOCUMENT GENERATOR (PDFMAKE - Client Side) =============
+document.getElementById('genDocBtn').addEventListener('click', () => {
+  const docBlock = document.getElementById('docGeneratorBlock');
+  docBlock.style.display = 'block';
+  docBlock.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+
+document.getElementById('generateDoc').addEventListener('click', () => {
+  const c = DATA[currentCase];
+  if (!c) return;
+  
+  const name = document.getElementById('docName').value;
+  const address = document.getElementById('docAddress').value;
+  
+  if (!name || !address) {
+    alert('Wypełnij wszystkie wymagane pola (Imię i Adres)!');
+    return;
+  }
+
+  // 1. Zbieranie dynamicznych pól z formularza
+  const dynamicFields = [];
+  if (c.docFields) {
+    Object.keys(c.docFields).forEach(fieldKey => {
+      const val = document.getElementById(`doc_${fieldKey}`)?.value || '';
+      const label = c.docFields[fieldKey];
+      if (val) {
+        dynamicFields.push({
+          columns: [
+            { width: '40%', text: label + ':', bold: true, fontSize: 10 },
+            { width: '60%', text: val, fontSize: 10 }
+          ],
+          margin: [0, 2]
+        });
+      }
+    });
+  }
+
+  // 2. Przygotowanie listy kroków
+  const stepsList = c.steps.map((step, index) => ({
+    text: [
+      { text: `${index + 1}. ${step[0]}`, bold: true, fontSize: 11 },
+      '\n',
+      { text: step[1], color: '#64748b', fontSize: 9, italics: true }
+    ],
+    margin: [0, 0, 0, 8]
+  }));
+
+  // 3. Przygotowanie listy błędów
+  const mistakesList = c.mistakes.map(m => ({
+    text: `⚠ ${m}`,
+    fontSize: 10,
+    color: '#ef4444',
+    margin: [0, 2]
+  }));
+
+  // 4. Definicja dokumentu (pdfMake)
+  const docDefinition = {
+    info: {
+      title: c.title,
+      author: 'Aplikacja ZAŁATWIONE',
+    },
+    pageSize: 'A4',
+    pageMargins: [40, 60, 40, 60],
+    
+    content: [
+      // Nagłówek
+      { text: c.title.toUpperCase(), style: 'header' },
+      
+      // Linia
+      { canvas: [{ type: 'line', x1: 0, y1: 5, x2: 515, y2: 5, lineWidth: 1, lineColor: '#e2e8f0' }] },
+      { text: ' ', margin: [0, 10] },
+
+      // Sekcja Danych
+      { text: 'DANE WNIOSKODAWCY', style: 'subheader' },
+      {
+        style: 'tableExample',
+        table: {
+          widths: ['*'],
+          body: [
+            [{
+              stack: [
+                {
+                  columns: [
+                    { width: '40%', text: 'Imię i nazwisko:', bold: true, fontSize: 10 },
+                    { width: '60%', text: name, fontSize: 10 }
+                  ],
+                  margin: [0, 2]
+                },
+                {
+                  columns: [
+                    { width: '40%', text: 'Adres:', bold: true, fontSize: 10 },
+                    { width: '60%', text: address, fontSize: 10 }
+                  ],
+                  margin: [0, 2]
+                },
+                ...dynamicFields
+              ]
+            }]
+          ]
+        },
+        layout: 'noBorders',
+        margin: [0, 0, 0, 20]
+      },
+
+      // Sekcja Kroków
+      { text: 'KROKI DO WYKONANIA', style: 'subheader' },
+      { stack: stepsList, margin: [0, 0, 0, 15] },
+
+      // Sekcja Błędów
+      { text: 'NAJCZĘSTSZE BŁĘDY', style: 'subheader' },
+      { ul: mistakesList, margin: [0, 0, 0, 15] },
+
+      // Podstawa prawna
+      { text: 'PODSTAWA PRAWNA', style: 'subheader' },
+      { text: c.legal, fontSize: 9, italics: true, color: '#64748b' },
+      
+      // Stopka generowania
+      { 
+        text: `\nWygenerowano w aplikacji ZAŁATWIONE • ${new Date().toLocaleDateString('pl-PL')}`, 
+        fontSize: 8, 
+        color: '#cbd5e1', 
+        alignment: 'center', 
+        margin: [0, 30, 0, 0] 
+      }
+    ],
+
+    styles: {
+      header: {
+        fontSize: 18,
+        bold: true,
+        color: '#0ea5e9',
+        alignment: 'center',
+        margin: [0, 0, 0, 10]
+      },
+      subheader: {
+        fontSize: 12,
+        bold: true,
+        color: '#0f172a',
+        margin: [0, 10, 0, 5],
+        decoration: 'underline',
+        decorationStyle: 'dotted',
+        decorationColor: '#e2e8f0'
+      }
+    },
+    defaultStyle: {
+      font: 'Roboto'
+    }
+  };
+
+  // 5. Generowanie
+  try {
+    const btn = document.getElementById('generateDoc');
+    const oldText = btn.textContent;
+    btn.textContent = "Generowanie...";
+    
+    pdfMake.createPdf(docDefinition).download(`${currentCase}_dokument.pdf`);
+    
+    // Sukces UI
+    const success = document.getElementById('docSuccess');
+    success.textContent = "✓ PDF wygenerowany!";
+    success.classList.add('show');
+    
+    btn.textContent = oldText;
+    setTimeout(() => success.classList.remove('show'), 4000);
+    
+  } catch (e) {
+    console.error(e);
+    alert('Wystąpił błąd podczas generowania PDF. Sprawdź konsolę.');
+  }
+});
+
+// ============= ADD TO PANEL =============
+document.getElementById('addToPanelBtn').addEventListener('click', () => {
+  const c = DATA[currentCase];
+  if (!c) return;
+  
+  const caseData = {
+    id: `${currentCase}_${Date.now()}`,
+    key: currentCase,
+    title: c.title,
+    status: 'inProgress',
+    addedAt: Date.now(),
+    checks: []
+  };
+  
+  Storage.addCase(caseData);
+  alert('✓ Sprawa dodana do Twojego panelu!');
+  renderMyCases();
+});
+
+// ============= RENDER FUNCTIONS =============
+function renderRecentCases() {
+  const container = document.getElementById('recentCases');
+  const history = Storage.getHistory();
+  
+  if (history.length === 0) {
+    container.innerHTML = `
+      <div class="emptyState" style="grid-column: 1/-1">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <p>Brak ostatnich spraw. Wyszukaj coś powyżej!</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = history.slice(0, 4).map(item => {
+    const timeAgo = formatTimeAgo(item.timestamp);
+    return `
+      <div class="miniItem" data-open="${item.key}">
+        <div class="dot"></div>
+        <div>
+          <b>${item.title}</b>
+          <span>Ostatnio: ${timeAgo}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderMyCases() {
+  const container = document.getElementById('myCases');
+  const cases = Storage.getCases();
+  
+  if (cases.length === 0) {
+    container.innerHTML = `
+      <div class="emptyState" style="grid-column: 1/-1">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="9" y1="9" x2="15" y2="9"></line>
+          <line x1="9" y1="15" x2="15" y2="15"></line>
+        </svg>
+        <p>Nie masz jeszcze żadnych spraw.<br>Dodaj sprawę z okna szczegółów!</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = cases.map(c => {
+    const caseData = DATA[c.key];
+    if (!caseData) return '';
+    
+    const statusLabel = c.status === 'completed' ? 'Ukończono' : 'W toku';
+    const statusClass = c.status === 'completed' ? 'completed' : 'inProgress';
+    
+    return `
+      <div class="card" data-open="${c.key}">
+        <div class="statusBadge ${statusClass}">${statusLabel}</div>
+        <h3>${c.title}</h3>
+        <p>${caseData.meta.time} • ${caseData.meta.deadline}</p>
+        <button class="removeItem" data-id="${c.id}">✕</button>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============= CALCULATORS =============
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const tabId = tab.dataset.tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tabContent').forEach(tc => tc.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+  });
+});
+
+// PIT-0 Calculator
+document.getElementById('calculatePit').addEventListener('click', () => {
+  const birthYear = parseInt(document.getElementById('pitBirthYear').value);
+  const income = parseFloat(document.getElementById('pitIncome').value);
+  const source = document.getElementById('pitSource').value;
+  
+  const resultDiv = document.getElementById('pitResult');
+  
+  if (!birthYear || !income || !source) {
+    resultDiv.innerHTML = '<p style="color: var(--bad); margin-top: 16px">Wypełnij wszystkie pola!</p>';
+    return;
+  }
+  
+  const currentYear = new Date().getFullYear();
+  const age = currentYear - birthYear;
+  const limit = 85528;
+  
+  let result = '';
+  let eligible = false;
+  
+  if (age > 26) {
+    result = `<div class="calcResult">
+      <h4>Wynik: NIE</h4>
+      <p>Masz ${age} lat. Ulga PIT-0 dotyczy osób do 26. roku życia.</p>
+      <p><strong>Alternatywy:</strong> Sprawdź ulgi rodzinne, na dziecko, lub standardowe odliczenia.</p>
+    </div>`;
+  } else if (income > limit) {
+    result = `<div class="calcResult">
+      <h4>Wynik: NIE</h4>
+      <p>Twoje przychody (${income.toLocaleString('pl-PL')} PLN) przekraczają limit ${limit.toLocaleString('pl-PL')} PLN.</p>
+      <p>Różnica: <strong>${(income - limit).toLocaleString('pl-PL')} PLN</strong></p>
+    </div>`;
+  } else if (source === 'business') {
+    result = `<div class="calcResult">
+      <h4>Wynik: SPRAWDŹ</h4>
+      <p>Dla działalności gospodarczej warunki są bardziej skomplikowane.</p>
+      <p>Skonsultuj się z księgowym lub urzędem skarbowym.</p>
+    </div>`;
+  } else {
+    eligible = true;
+    const saved = Math.round(income * 0.12); // Approx 12% tax
+    result = `<div class="calcResult">
+      <h4>Wynik: TAK! ✓</h4>
+      <div class="bigNumber">${saved.toLocaleString('pl-PL')} PLN</div>
+      <p>Szacunkowa oszczędność rocznie</p>
+      <p>Masz ${age} lat, przychód ${income.toLocaleString('pl-PL')} PLN - spełniasz warunki!</p>
+      <p><strong>Następny krok:</strong> Złóż PIT-0 w urzędzie skarbowym przed 30 kwietnia.</p>
+    </div>`;
+  }
+  
+  resultDiv.innerHTML = result;
+});
+
+// Deadline Calculator
+document.getElementById('calculateDeadline').addEventListener('click', () => {
+  const type = document.getElementById('deadlineType').value;
+  const startDate = new Date(document.getElementById('deadlineStart').value);
+  
+  const resultDiv = document.getElementById('deadlineResult');
+  
+  if (!startDate || isNaN(startDate.getTime())) {
+    resultDiv.innerHTML = '<p style="color: var(--bad); margin-top: 16px">Wybierz datę!</p>';
+    return;
+  }
+  
+  let deadline = new Date(startDate);
+  let description = '';
+  
+  switch(type) {
+    case 'pit':
+      deadline = new Date(startDate.getFullYear(), 3, 30); // April 30
+      if (deadline < startDate) deadline.setFullYear(deadline.getFullYear() + 1);
+      description = 'Termin złożenia PIT';
+      break;
+    case 'dowod':
+      deadline = new Date(startDate);
+      deadline.setDate(deadline.getDate() - 30);
+      description = 'Należy wymienić dowód najpóźniej';
+      break;
+    case 'reklamacja':
+      deadline = new Date(startDate);
+      deadline.setFullYear(deadline.getFullYear() + 2);
+      description = 'Koniec okresu reklamacji';
+      break;
+    case 'wypowiedzenie':
+      deadline = new Date(startDate);
+      deadline.setDate(deadline.getDate() + 30);
+      description = 'Termin wypowiedzenia (standard)';
+      break;
+  }
+  
+  const daysUntil = Math.ceil((deadline - new Date()) / (1000 * 60 * 60 * 24));
+  const urgency = daysUntil < 7 ? 'bad' : daysUntil < 30 ? 'warn' : 'good';
+  
+  resultDiv.innerHTML = `
+    <div class="calcResult">
+      <h4>${description}</h4>
+      <div class="bigNumber">${deadline.toLocaleDateString('pl-PL')}</div>
+      <p style="color: var(--${urgency}); font-weight: 700">
+        ${daysUntil > 0 ? `Za ${daysUntil} dni` : 'TERMIN MINĄŁ!'}
+      </p>
+    </div>
+  `;
+});
+
+// Cost Calculator
+document.getElementById('costType').addEventListener('change', (e) => {
+  const extra = document.getElementById('costExtraGroup');
+  extra.style.display = e.target.value === 'paszport' ? 'block' : 'none';
+});
+
+document.getElementById('calculateCost').addEventListener('click', () => {
+  const type = document.getElementById('costType').value;
+  const express = document.getElementById('costExpress').checked;
+  
+  const resultDiv = document.getElementById('costResult');
+  
+  const costs = {
+    dowod: { base: 60, express: 100, name: 'Wymiana dowodu' },
+    paszport: { base: 140, express: 260, name: 'Paszport' },
+    najmu: { base: 0, express: 100, name: 'Umowa najmu', note: 'Notariusz opcjonalnie 100-300 zł' },
+    aktystan: { base: 33, express: 50, name: 'Akt stanu cywilnego' }
+  };
+  
+  const selected = costs[type];
+  if (!selected) return;
+  
+  const cost = express ? selected.express : selected.base;
+  
+  resultDiv.innerHTML = `
+    <div class="calcResult">
+      <h4>${selected.name}</h4>
+      <div class="bigNumber">${cost} PLN</div>
+      ${express ? '<p>Opcja ekspresowa</p>' : '<p>Koszt standardowy</p>'}
+      ${selected.note ? `<p style="margin-top: 12px; font-size: 13px">${selected.note}</p>` : ''}
+    </div>
+  `;
+});
+
+// ============= CALENDAR / ICS LOGIC (NEW) =============
+const calType = document.getElementById("calType");
+const calStartDate = document.getElementById("calStartDate");
+const calCalcBtn = document.getElementById("calCalcBtn");
+const calResult = document.getElementById("calResult");
+const calTitleText = document.getElementById("calTitleText");
+const calDateText = document.getElementById("calDateText");
+const calDownloadBtn = document.getElementById("calDownloadBtn");
+
+let calComputedDate = null;
+let calComputedTitle = "";
+
+function pad(n) { return String(n).padStart(2, "0"); }
+function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+
+calCalcBtn.addEventListener("click", () => {
+  const startVal = calStartDate.value;
+  if (!startVal) return alert("Wybierz datę początkową!");
+
+  const d = new Date(startVal);
+  const type = calType.value;
+  
+  let targetDate = new Date(d);
+  let title = "";
+
+  if (type === "pit") {
+    const year = d.getFullYear() + 1;
+    targetDate = new Date(`${year}-04-30`);
+    title = "Termin złożenia PIT";
+  } else if (type === "odwolanie14") {
+    targetDate = addDays(d, 14);
+    title = "Termin odwołania od decyzji";
+  } else if (type === "kpa30" || type === "dowod") {
+    targetDate = addDays(d, 30);
+    title = type === "dowod" ? "Odbiór dowodu osobistego" : "Termin odpowiedzi urzędu";
+  } else if (type === "wypowiedzenie") {
+    targetDate.setMonth(targetDate.getMonth() + 1);
+    title = "Koniec okresu wypowiedzenia";
+  }
+
+  calComputedDate = targetDate;
+  calComputedTitle = title;
+
+  calTitleText.textContent = title;
+  calDateText.textContent = targetDate.toLocaleDateString("pl-PL", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  calResult.style.display = "block";
+});
+
+calDownloadBtn.addEventListener("click", () => {
+  if (!calComputedDate) return;
+
+  const dayStr = calComputedDate.toISOString().replace(/-|:|\.\d+/g, "").substring(0, 8);
+  
+  const icsContent = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Zalatwione//Terminy//PL",
+    "BEGIN:VEVENT",
+    `DTSTART;VALUE=DATE:${dayStr}`,
+    `DTEND;VALUE=DATE:${dayStr}`,
+    `SUMMARY:🚨 ${calComputedTitle}`,
+    "DESCRIPTION:Przypomnienie wygenerowane przez aplikację Załatwione.",
+    "BEGIN:VALARM",
+    "TRIGGER:-P1D",
+    "DESCRIPTION:Jutro mija termin!",
+    "ACTION:DISPLAY",
+    "END:VALARM",
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ].join("\r\n");
+
+  const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "termin_urzedowy.ics");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+});
+
+// ============= CLEAR HISTORY =============
+document.getElementById('clearHistory').addEventListener('click', () => {
+  if (confirm('Czy na pewno chcesz wyczyścić historię ostatnich spraw?')) {
+    Storage.clearHistory();
+    renderRecentCases();
+  }
+});
+
+// ============= HELPERS =============
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, (m) => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+  }[m]));
+}
+
+function formatTimeAgo(timestamp) {
+  const seconds = Math.floor((Date.now() - timestamp) / 1000);
+  if (seconds < 60) return 'przed chwilą';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} min temu`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h temu`;
+  const days = Math.floor(hours / 24);
+  return `${days} dni temu`;
+}
+</script>
+</body>
+</html>
