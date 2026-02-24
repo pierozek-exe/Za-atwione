@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ZAŁATWIONE — sprawy urzędowe krok po kroku</title>
   <meta name="description" content="Sprawy urzędowe krok po kroku. Dokumenty, checklisty, terminy i kalkulatory." />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
     :root{
@@ -1016,6 +1017,7 @@
       <div class="navLink" data-section="sprawy">Moje sprawy</div>
     </div>
     
+    <button class="cta" onclick="openPdfGenerator(null)">📄 Generator PDF</button>
     <button class="cta" id="addNewBtn">+ Dodaj sprawę</button>
   </div>
 </nav>
@@ -2257,9 +2259,7 @@
   });
 
   document.getElementById('genDocBtn').addEventListener('click', () => {
-    const key = overlay.dataset.case;
-    if (!key) return;
-    alert('Generowanie dokumentów będzie dostępne wkrótce. Na razie skorzystaj z linków gov.pl powyżej.');
+    // Obsługiwane przez nowy handler w module PDF (capture=true)
   });
 
   // === ZAPISYWANIE SPRAWY ===
@@ -2331,6 +2331,505 @@
       '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
     }[m]));
   }
+</script>
+
+<!-- === MODAL GENERATORA PDF === -->
+<style>
+  .pdfOverlay{ display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(15,23,42,.75); backdrop-filter:blur(4px); z-index:200; padding:20px; overflow-y:auto; align-items:flex-start; justify-content:center; padding-top:40px; }
+  .pdfOverlay.active{ display:flex; }
+  .pdfModal{ background:var(--modal-bg); border-radius:var(--radius); max-width:680px; width:100%; box-shadow:var(--shadow-lg); position:relative; }
+  .pdfModalHeader{ padding:22px 24px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--modal-header-bg); border-radius:var(--radius) var(--radius) 0 0; z-index:5; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .pdfModalHeader h2{ margin:0; font-size:20px; font-weight:800; }
+  .pdfModalBody{ padding:24px; }
+  .pdfTabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; }
+  .pdfTab{ padding:9px 16px; border:2px solid var(--line); border-radius:10px; background:var(--bg); color:var(--muted); font-weight:600; font-size:14px; cursor:pointer; transition:.2s; }
+  .pdfTab:hover{ border-color:var(--accent); color:var(--accent); }
+  .pdfTab.active{ border-color:var(--accent); background:rgba(14,165,233,.08); color:var(--accent); }
+  .pdfForm{ display:none; }
+  .pdfForm.active{ display:block; animation:fadeIn .25s ease; }
+  .pdfFieldGroup{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+  @media(max-width:560px){ .pdfFieldGroup{ grid-template-columns:1fr; } }
+  .pdfField{ margin-bottom:14px; }
+  .pdfField label{ display:block; font-weight:700; font-size:13px; margin-bottom:6px; color:var(--text); }
+  .pdfField input, .pdfField textarea, .pdfField select{
+    width:100%; border:2px solid var(--line); border-radius:9px;
+    padding:10px 13px; font-size:14px; background:var(--input-bg); color:var(--text);
+    font-family:var(--font); transition:.2s;
+  }
+  .pdfField input:focus, .pdfField textarea:focus, .pdfField select:focus{
+    outline:0; border-color:var(--accent); background:var(--card);
+    box-shadow:0 0 0 3px rgba(14,165,233,.1);
+  }
+  .pdfField textarea{ resize:vertical; min-height:90px; }
+  .pdfHint{ font-size:12px; color:var(--muted); margin-top:5px; line-height:1.4; }
+  .pdfPreviewBox{ background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:16px; font-size:13px; line-height:1.7; color:var(--text); white-space:pre-wrap; margin-bottom:20px; max-height:260px; overflow-y:auto; font-family:Georgia,serif; display:none; }
+  .pdfPreviewBox.visible{ display:block; }
+  .pdfActions{ display:flex; gap:10px; flex-wrap:wrap; padding-top:16px; border-top:1px solid var(--line); }
+  .pdfSuccess{ display:none; text-align:center; padding:24px 16px; }
+  .pdfSuccess .icon{ font-size:52px; margin-bottom:12px; }
+  .pdfSuccess h3{ margin:0 0 8px; font-size:20px; font-weight:800; }
+  .pdfSuccess p{ color:var(--muted); margin:0 0 20px; font-size:15px; }
+</style>
+
+<div class="pdfOverlay" id="pdfOverlay">
+  <div class="pdfModal">
+    <div class="pdfModalHeader">
+      <h2>📄 Generator dokumentów PDF</h2>
+      <button class="closeModal" id="closePdfModal">✕</button>
+    </div>
+    <div class="pdfModalBody">
+
+      <!-- Zakładki typów dokumentów -->
+      <div class="pdfTabs">
+        <button class="pdfTab active" data-form="reklamacja">📝 Reklamacja</button>
+        <button class="pdfTab" data-form="odwolanie">⚖️ Odwołanie</button>
+        <button class="pdfTab" data-form="wypowiedzenie">🏠 Wypowiedzenie najmu</button>
+        <button class="pdfTab" data-form="uzasadnienie">📄 Wniosek o uzasadnienie</button>
+      </div>
+
+      <!-- === REKLAMACJA === -->
+      <div class="pdfForm active" id="form-reklamacja">
+        <div class="pdfFieldGroup">
+          <div class="pdfField"><label>Imię i nazwisko *</label><input id="rek-imie" placeholder="Jan Kowalski" /></div>
+          <div class="pdfField"><label>Adres zamieszkania *</label><input id="rek-adres" placeholder="ul. Przykładowa 1, 00-001 Warszawa" /></div>
+        </div>
+        <div class="pdfFieldGroup">
+          <div class="pdfField"><label>Sprzedawca / firma *</label><input id="rek-sprzedawca" placeholder="Sklep XYZ sp. z o.o." /></div>
+          <div class="pdfField"><label>Adres sprzedawcy</label><input id="rek-adres-sp" placeholder="ul. Handlowa 5, 00-002 Warszawa" /></div>
+        </div>
+        <div class="pdfFieldGroup">
+          <div class="pdfField"><label>Produkt / usługa *</label><input id="rek-produkt" placeholder="Laptop Dell Inspiron 15" /></div>
+          <div class="pdfField"><label>Data zakupu *</label><input id="rek-data-zakupu" type="date" /></div>
+        </div>
+        <div class="pdfField"><label>Opis wady / problemu *</label><textarea id="rek-wada" placeholder="Opisz dokładnie wadę lub niezgodność z umową..."></textarea></div>
+        <div class="pdfFieldGroup">
+          <div class="pdfField">
+            <label>Żądanie *</label>
+            <select id="rek-zadanie">
+              <option value="naprawa">Bezpłatna naprawa</option>
+              <option value="wymiana">Wymiana na nowy</option>
+              <option value="zwrot">Zwrot pieniędzy</option>
+              <option value="obnizenie">Obniżenie ceny</option>
+            </select>
+          </div>
+          <div class="pdfField"><label>Data pisma *</label><input id="rek-data-pisma" type="date" /></div>
+        </div>
+        <div class="pdfField"><label>Numer dokumentu zakupu (paragon/faktura)</label><input id="rek-paragon" placeholder="np. FV/2024/01234" /></div>
+      </div>
+
+      <!-- === ODWOŁANIE === -->
+      <div class="pdfForm" id="form-odwolanie">
+        <div class="pdfFieldGroup">
+          <div class="pdfField"><label>Imię i nazwisko *</label><input id="odw-imie" placeholder="Jan Kowalski" /></div>
+          <div class="pdfField"><label>Adres zamieszkania *</label><input id="odw-adres" placeholder="ul. Przykładowa 1, 00-001 Warszawa" /></div>
+        </div>
+        <div class="pdfFieldGroup">
+          <div class="pdfField"><label>Organ wydający decyzję *</label><input id="odw-organ" placeholder="Urząd Skarbowy w Warszawie" /></div>
+          <div class="pdfField"><label>Organ odwoławczy *</label><input id="odw-organ2" placeholder="Dyrektor Izby Administracji Skarbowej" /></div>
+        </div>
+        <div class="pdfFieldGroup">
+          <div class="pdfField"><label>Numer decyzji *</label><input id="odw-nr" placeholder="np. US.XII.123.2024" /></div>
+          <div class="pdfField"><label>Data decyzji *</label><input id="odw-data-dec" type="date" /></div>
+        </div>
+        <div class="pdfField"><label>Zarzuty / uzasadnienie odwołania *</label><textarea id="odw-zarzuty" placeholder="Opisz, z czym się nie zgadzasz i dlaczego decyzja jest błędna..."></textarea></div>
+        <div class="pdfField"><label>Żądanie *</label><textarea id="odw-zadanie" placeholder="Wnoszę o uchylenie zaskarżonej decyzji w całości i wydanie decyzji odmiennej..." style="min-height:70px"></textarea></div>
+        <div class="pdfFieldGroup">
+          <div class="pdfField"><label>Miejscowość *</label><input id="odw-miasto" placeholder="Warszawa" /></div>
+          <div class="pdfField"><label>Data pisma *</label><input id="odw-data-pisma" type="date" /></div>
+        </div>
+      </div>
+
+      <!-- === WYPOWIEDZENIE NAJMU === -->
+      <div class="pdfForm" id="form-wypowiedzenie">
+        <div class="pdfFieldGroup">
+          <div class="pdfField"><label>Imię i nazwisko najemcy *</label><input id="wyp-imie" placeholder="Jan Kowalski" /></div>
+          <div class="pdfField"><label>Adres najemcy *</label><input id="wyp-adres-najem" placeholder="ul. Przykładowa 1, 00-001 Warszawa" /></div>
+        </div>
+        <div class="pdfFieldGroup">
+          <div class="pdfField"><label>Imię i nazwisko wynajmującego *</label><input id="wyp-wynajmujacy" placeholder="Anna Nowak" /></div>
+          <div class="pdfField"><label>Adres wynajmującego</label><input id="wyp-adres-wyn" placeholder="ul. Właścicielska 2, 00-002 Warszawa" /></div>
+        </div>
+        <div class="pdfField"><label>Adres wynajmowanego lokalu *</label><input id="wyp-lokal" placeholder="ul. Mieszkalna 3/4, 00-003 Warszawa" /></div>
+        <div class="pdfFieldGroup">
+          <div class="pdfField"><label>Data zawarcia umowy *</label><input id="wyp-data-umowy" type="date" /></div>
+          <div class="pdfField">
+            <label>Okres wypowiedzenia *</label>
+            <select id="wyp-okres">
+              <option value="1 miesiąc">1 miesiąc</option>
+              <option value="3 miesiące">3 miesiące</option>
+              <option value="tydzień">1 tydzień</option>
+            </select>
+          </div>
+        </div>
+        <div class="pdfField">
+          <label>Powód wypowiedzenia</label>
+          <select id="wyp-powod">
+            <option value="">Nie podaję powodu</option>
+            <option value="przeprowadzka">Przeprowadzka</option>
+            <option value="zakup własnego mieszkania">Zakup własnego mieszkania</option>
+            <option value="sytuacja finansowa">Sytuacja finansowa</option>
+            <option value="inne">Inne (wpisz poniżej)</option>
+          </select>
+        </div>
+        <div class="pdfField"><label>Dodatkowe uwagi / własny powód</label><textarea id="wyp-uwagi" placeholder="Opcjonalnie..." style="min-height:60px"></textarea></div>
+        <div class="pdfFieldGroup">
+          <div class="pdfField"><label>Miejscowość *</label><input id="wyp-miasto" placeholder="Warszawa" /></div>
+          <div class="pdfField"><label>Data pisma *</label><input id="wyp-data-pisma" type="date" /></div>
+        </div>
+      </div>
+
+      <!-- === WNIOSEK O UZASADNIENIE === -->
+      <div class="pdfForm" id="form-uzasadnienie">
+        <div class="pdfFieldGroup">
+          <div class="pdfField"><label>Imię i nazwisko *</label><input id="uz-imie" placeholder="Jan Kowalski" /></div>
+          <div class="pdfField"><label>Adres zamieszkania *</label><input id="uz-adres" placeholder="ul. Przykładowa 1, 00-001 Warszawa" /></div>
+        </div>
+        <div class="pdfFieldGroup">
+          <div class="pdfField"><label>Organ, do którego pismo *</label><input id="uz-organ" placeholder="Urząd Skarbowy w Warszawie" /></div>
+          <div class="pdfField"><label>Numer decyzji / postanowienia *</label><input id="uz-nr" placeholder="np. US.XII.123.2024" /></div>
+        </div>
+        <div class="pdfFieldGroup">
+          <div class="pdfField"><label>Data decyzji *</label><input id="uz-data-dec" type="date" /></div>
+          <div class="pdfField"><label>Data doręczenia decyzji *</label><input id="uz-data-dor" type="date" /></div>
+        </div>
+        <div class="pdfField">
+          <label>Cel wniosku *</label>
+          <select id="uz-cel">
+            <option value="ocena zasadności odwołania">Ocena zasadności wniesienia odwołania</option>
+            <option value="zapoznanie się z motywami rozstrzygnięcia">Zapoznanie się z motywami rozstrzygnięcia</option>
+            <option value="ochrony swoich praw">Ochrony swoich praw i interesów</option>
+          </select>
+        </div>
+        <div class="pdfFieldGroup">
+          <div class="pdfField"><label>Miejscowość *</label><input id="uz-miasto" placeholder="Warszawa" /></div>
+          <div class="pdfField"><label>Data pisma *</label><input id="uz-data-pisma" type="date" /></div>
+        </div>
+      </div>
+
+      <!-- Podgląd -->
+      <div id="pdfPreviewBox" class="pdfPreviewBox"></div>
+
+      <!-- Sukces -->
+      <div class="pdfSuccess" id="pdfSuccess">
+        <div class="icon">✅</div>
+        <h3>Dokument gotowy!</h3>
+        <p>PDF został wygenerowany i pobrany na Twoje urządzenie.</p>
+        <button class="btnPrimary" id="pdfSuccessBack">← Wróć do formularza</button>
+      </div>
+
+      <div class="pdfActions" id="pdfActions">
+        <button class="btnPrimary" id="pdfPreviewBtn">👁 Podgląd</button>
+        <button class="btnPrimary" id="pdfDownloadBtn" style="background:linear-gradient(135deg,#10b981,#059669)">⬇ Pobierz PDF</button>
+        <button class="btnSecondary" id="pdfClearBtn">🗑 Wyczyść</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// === GENERATOR PDF (jsPDF) ==================================
+// ============================================================
+
+// --- Otwieranie / zamykanie ---
+function openPdfGenerator(formKey) {
+  const overlay = document.getElementById('pdfOverlay');
+  overlay.classList.add('active');
+  if (formKey) switchPdfTab(formKey);
+  // Ustaw dzisiejszą datę w polach date jeśli puste
+  overlay.querySelectorAll('input[type="date"]').forEach(inp => {
+    if (!inp.value) inp.value = new Date().toISOString().split('T')[0];
+  });
+  document.getElementById('pdfPreviewBox').classList.remove('visible');
+  document.getElementById('pdfSuccess').style.display = 'none';
+  document.getElementById('pdfActions').style.display = 'flex';
+}
+
+document.getElementById('closePdfModal').addEventListener('click', () => {
+  document.getElementById('pdfOverlay').classList.remove('active');
+});
+document.getElementById('pdfOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('pdfOverlay'))
+    document.getElementById('pdfOverlay').classList.remove('active');
+});
+
+// --- Zakładki ---
+function switchPdfTab(key) {
+  document.querySelectorAll('.pdfTab').forEach(t => t.classList.toggle('active', t.dataset.form === key));
+  document.querySelectorAll('.pdfForm').forEach(f => f.classList.toggle('active', f.id === `form-${key}`));
+  document.getElementById('pdfPreviewBox').classList.remove('visible');
+  document.getElementById('pdfPreviewBox').textContent = '';
+}
+document.querySelectorAll('.pdfTab').forEach(tab => {
+  tab.addEventListener('click', () => switchPdfTab(tab.dataset.form));
+});
+
+// --- Pobierz aktywny formularz ---
+function activeForm() {
+  return document.querySelector('.pdfTab.active')?.dataset.form;
+}
+
+// --- Walidacja ---
+function val(id) { return (document.getElementById(id)?.value || '').trim(); }
+function validate(fields) {
+  for (const [id, label] of fields) {
+    if (!val(id)) { alert(`Uzupełnij pole: ${label}`); document.getElementById(id)?.focus(); return false; }
+  }
+  return true;
+}
+
+// --- Szablony treści ---
+function buildReklamacja() {
+  if (!validate([['rek-imie','Imię i nazwisko'],['rek-adres','Adres'],['rek-sprzedawca','Sprzedawca'],['rek-produkt','Produkt'],['rek-data-zakupu','Data zakupu'],['rek-wada','Opis wady']])) return null;
+  const zadMap = { naprawa:'bezpłatną naprawę towaru', wymiana:'wymianę towaru na nowy, wolny od wad', zwrot:'odstąpienie od umowy i zwrot ceny', obnizenie:'stosowne obniżenie ceny' };
+  const zad = zadMap[val('rek-zadanie')] || val('rek-zadanie');
+  const paragon = val('rek-paragon') ? `\nNumer dokumentu zakupu: ${val('rek-paragon')}` : '';
+  return {
+    title: 'REKLAMACJA TOWARU / USŁUGI',
+    nadawca: `${val('rek-imie')}\n${val('rek-adres')}`,
+    odbiorca: `${val('rek-sprzedawca')}${val('rek-adres-sp') ? '\n'+val('rek-adres-sp') : ''}`,
+    miasto: '',
+    data: formatDatePL(val('rek-data-pisma')),
+    tresc: [
+      `Działając na podstawie art. 556 i nast. ustawy z dnia 23 kwietnia 1964 r. Kodeks cywilny (rękojmia za wady) oraz przepisów ustawy o prawach konsumenta, niniejszym składam reklamację dotyczącą:`,
+      `Produkt/usługa: ${val('rek-produkt')}\nData zakupu: ${formatDatePL(val('rek-data-zakupu'))}${paragon}`,
+      `OPIS WADY:\n${val('rek-wada')}`,
+      `ŻĄDANIE:\nWnoszę o ${zad}.`,
+      `Jednocześnie proszę o rozpatrzenie reklamacji w terminie 14 dni od daty jej otrzymania i poinformowanie mnie o sposobie jej rozpatrzenia.`,
+      `W przypadku nieuwzględnienia reklamacji proszę o pisemne uzasadnienie odmowy.`,
+    ],
+    podpis: val('rek-imie'),
+  };
+}
+
+function buildOdwolanie() {
+  if (!validate([['odw-imie','Imię i nazwisko'],['odw-adres','Adres'],['odw-organ','Organ wydający'],['odw-organ2','Organ odwoławczy'],['odw-nr','Numer decyzji'],['odw-data-dec','Data decyzji'],['odw-zarzuty','Uzasadnienie'],['odw-zadanie','Żądanie']])) return null;
+  return {
+    title: 'ODWOŁANIE OD DECYZJI',
+    nadawca: `${val('odw-imie')}\n${val('odw-adres')}`,
+    odbiorca: val('odw-organ2'),
+    poprzez: val('odw-organ'),
+    miasto: val('odw-miasto'),
+    data: formatDatePL(val('odw-data-pisma')),
+    tresc: [
+      `Na podstawie art. 127 § 1 i 2 oraz art. 129 § 1 i 2 ustawy z dnia 14 czerwca 1960 r. Kodeks postępowania administracyjnego (k.p.a.) wnoszę odwołanie od decyzji:`,
+      `Organ wydający: ${val('odw-organ')}\nNumer decyzji: ${val('odw-nr')}\nData decyzji: ${formatDatePL(val('odw-data-dec'))}`,
+      `ZARZUTY I UZASADNIENIE:\n${val('odw-zarzuty')}`,
+      `ŻĄDANIE:\n${val('odw-zadanie')}`,
+      `Odwołanie wnoszę w terminie 14 dni od dnia doręczenia zaskarżonej decyzji, co czyni je dopuszczalnym i wniesionym w terminie.`,
+    ],
+    podpis: val('odw-imie'),
+  };
+}
+
+function buildWypowiedzenie() {
+  if (!validate([['wyp-imie','Imię i nazwisko'],['wyp-adres-najem','Adres najemcy'],['wyp-wynajmujacy','Wynajmujący'],['wyp-lokal','Adres lokalu'],['wyp-data-umowy','Data umowy']])) return null;
+  const powod = val('wyp-powod') !== 'inne' && val('wyp-powod') ? val('wyp-powod') : val('wyp-uwagi');
+  const powodTxt = powod ? `\nPowód wypowiedzenia: ${powod}.` : '';
+  const uwagi = val('wyp-powod') === 'inne' ? '' : (val('wyp-uwagi') ? `\n${val('wyp-uwagi')}` : '');
+  return {
+    title: 'WYPOWIEDZENIE UMOWY NAJMU',
+    nadawca: `${val('wyp-imie')}\n${val('wyp-adres-najem')}`,
+    odbiorca: `${val('wyp-wynajmujacy')}${val('wyp-adres-wyn') ? '\n'+val('wyp-adres-wyn') : ''}`,
+    miasto: val('wyp-miasto'),
+    data: formatDatePL(val('wyp-data-pisma')),
+    tresc: [
+      `Działając na podstawie art. 688 ustawy z dnia 23 kwietnia 1964 r. Kodeks cywilny oraz ustawy z dnia 21 czerwca 2001 r. o ochronie praw lokatorów, niniejszym wypowiadam umowę najmu lokalu mieszkalnego:`,
+      `Lokal: ${val('wyp-lokal')}\nUmowa zawarta dnia: ${formatDatePL(val('wyp-data-umowy'))}\nOkres wypowiedzenia: ${val('wyp-okres')}${powodTxt}${uwagi}`,
+      `Wypowiedzenie jest skuteczne z upływem okresu wypowiedzenia, tj. ${val('wyp-okres')} od daty doręczenia niniejszego pisma.`,
+      `Zobowiązuję się do zwrotu lokalu w stanie niepogorszonym, wynikającym z normalnego używania, w dniu zakończenia stosunku najmu.`,
+      `Proszę o potwierdzenie odbioru niniejszego wypowiedzenia.`,
+    ],
+    podpis: val('wyp-imie'),
+  };
+}
+
+function buildUzasadnienie() {
+  if (!validate([['uz-imie','Imię i nazwisko'],['uz-adres','Adres'],['uz-organ','Organ'],['uz-nr','Numer decyzji'],['uz-data-dec','Data decyzji'],['uz-data-dor','Data doręczenia']])) return null;
+  return {
+    title: 'WNIOSEK O SPORZĄDZENIE UZASADNIENIA DECYZJI',
+    nadawca: `${val('uz-imie')}\n${val('uz-adres')}`,
+    odbiorca: val('uz-organ'),
+    miasto: val('uz-miasto'),
+    data: formatDatePL(val('uz-data-pisma')),
+    tresc: [
+      `Na podstawie art. 107 § 4 w zw. z art. 127 § 3 ustawy z dnia 14 czerwca 1960 r. Kodeks postępowania administracyjnego (k.p.a.) wnoszę o sporządzenie i doręczenie uzasadnienia decyzji:`,
+      `Organ: ${val('uz-organ')}\nNumer decyzji: ${val('uz-nr')}\nData decyzji: ${formatDatePL(val('uz-data-dec'))}\nData doręczenia: ${formatDatePL(val('uz-data-dor'))}`,
+      `Wniosek składam w celu: ${val('uz-cel')}.`,
+      `Uzasadnienie decyzji jest niezbędne do pełnej oceny stanu faktycznego i prawnego sprawy oraz do podjęcia decyzji co do dalszego postępowania.`,
+      `Wniosek wnoszę w ustawowym terminie 14 dni od dnia doręczenia decyzji.`,
+    ],
+    podpis: val('uz-imie'),
+  };
+}
+
+// --- Buduj tekst podglądu ---
+function buildText(doc) {
+  let lines = [];
+  lines.push(doc.nadawca);
+  lines.push('');
+  if (doc.poprzez) lines.push(`Za pośrednictwem:\n${doc.poprzez}\n`);
+  lines.push(doc.odbiorca);
+  lines.push('');
+  lines.push(`${doc.miasto ? doc.miasto + ', ' : ''}${doc.data}`);
+  lines.push('');
+  lines.push(doc.title);
+  lines.push('');
+  doc.tresc.forEach(p => { lines.push(p); lines.push(''); });
+  lines.push(`..................................`);
+  lines.push(doc.podpis);
+  return lines.join('\n');
+}
+
+// --- Generuj PDF ---
+function generatePdf(doc) {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  const margin = 25;
+  const pageW = 210;
+  const contentW = pageW - margin * 2;
+  let y = 25;
+
+  function addText(text, opts = {}) {
+    const { size=11, bold=false, align='left', color=[30,30,30], lineH=6 } = opts;
+    pdf.setFontSize(size);
+    pdf.setFont('helvetica', bold ? 'bold' : 'normal');
+    pdf.setTextColor(...color);
+    const lines = pdf.splitTextToSize(text, contentW);
+    lines.forEach(line => {
+      if (y > 270) { pdf.addPage(); y = 25; }
+      const x = align === 'right' ? pageW - margin : margin;
+      pdf.text(line, x, y, { align });
+      y += lineH;
+    });
+    return y;
+  }
+
+  function spacer(h = 5) { y += h; }
+
+  // Nagłówek — nadawca po lewej
+  doc.nadawca.split('\n').forEach(l => addText(l, { size:10 }));
+  spacer(4);
+
+  // Jeśli przez organ
+  if (doc.poprzez) {
+    addText('Za pośrednictwem:', { size:10, bold:true });
+    doc.poprzez.split('\n').forEach(l => addText(l, { size:10 }));
+    spacer(4);
+  }
+
+  // Odbiorca
+  doc.odbiorca.split('\n').forEach(l => addText(l, { size:10, bold:true }));
+  spacer(6);
+
+  // Data po prawej
+  const savedY = y;
+  pdf.setFontSize(10); pdf.setFont('helvetica','normal'); pdf.setTextColor(80,80,80);
+  pdf.text(`${doc.miasto ? doc.miasto + ', ' : ''}${doc.data}`, pageW - margin, savedY, { align:'right' });
+  spacer(10);
+
+  // Linia oddzielająca
+  pdf.setDrawColor(200,200,200); pdf.setLineWidth(0.3);
+  pdf.line(margin, y, pageW - margin, y);
+  spacer(8);
+
+  // Tytuł
+  addText(doc.title, { size:14, bold:true, align:'center', color:[14,165,233] });
+  spacer(8);
+
+  // Treść
+  doc.tresc.forEach((para, i) => {
+    addText(para, { size:10.5, lineH:5.5 });
+    spacer(4);
+  });
+
+  spacer(12);
+  addText('..................................', { size:10, color:[120,120,120] });
+  addText(doc.podpis, { size:10 });
+
+  // Stopka
+  pdf.setFontSize(8); pdf.setTextColor(160,160,160);
+  pdf.text('Wygenerowano przez: ZAŁATWIONE — zalatwionesprawy.pl', margin, 288);
+  pdf.text(new Date().toLocaleDateString('pl-PL'), pageW - margin, 288, { align:'right' });
+
+  return pdf;
+}
+
+function formatDatePL(isoDate) {
+  if (!isoDate) return new Date().toLocaleDateString('pl-PL');
+  const d = new Date(isoDate + 'T00:00:00');
+  return d.toLocaleDateString('pl-PL', { day:'numeric', month:'long', year:'numeric' });
+}
+
+function getDocData() {
+  const form = activeForm();
+  if (form === 'reklamacja')    return buildReklamacja();
+  if (form === 'odwolanie')     return buildOdwolanie();
+  if (form === 'wypowiedzenie') return buildWypowiedzenie();
+  if (form === 'uzasadnienie')  return buildUzasadnienie();
+  return null;
+}
+
+// Podgląd
+document.getElementById('pdfPreviewBtn').addEventListener('click', () => {
+  const doc = getDocData();
+  if (!doc) return;
+  const box = document.getElementById('pdfPreviewBox');
+  box.textContent = buildText(doc);
+  box.classList.add('visible');
+  box.scrollIntoView({ behavior:'smooth', block:'nearest' });
+});
+
+// Pobierz PDF
+document.getElementById('pdfDownloadBtn').addEventListener('click', () => {
+  const doc = getDocData();
+  if (!doc) return;
+  try {
+    const pdf = generatePdf(doc);
+    const filename = `${doc.title.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')}-${new Date().toISOString().split('T')[0]}.pdf`;
+    pdf.save(filename);
+    document.getElementById('pdfActions').style.display = 'none';
+    document.getElementById('pdfSuccess').style.display = 'block';
+    document.getElementById('pdfPreviewBox').classList.remove('visible');
+  } catch(e) {
+    alert('Błąd generowania PDF: ' + e.message);
+  }
+});
+
+// Wróć
+document.getElementById('pdfSuccessBack').addEventListener('click', () => {
+  document.getElementById('pdfSuccess').style.display = 'none';
+  document.getElementById('pdfActions').style.display = 'flex';
+});
+
+// Wyczyść
+document.getElementById('pdfClearBtn').addEventListener('click', () => {
+  const form = activeForm();
+  document.querySelectorAll(`#form-${form} input, #form-${form} textarea`).forEach(el => el.value = '');
+  document.querySelectorAll(`#form-${form} select`).forEach(el => el.selectedIndex = 0);
+  document.getElementById('pdfPreviewBox').classList.remove('visible');
+});
+
+// Escape
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.getElementById('pdfOverlay').classList.remove('active');
+});
+
+// Podpięcie przycisku "Wygeneruj dokument" z głównego modalu
+document.getElementById('genDocBtn').addEventListener('click', () => {
+  const key = document.getElementById('overlay').dataset.case;
+  // Mapuj klucz sprawy → typ dokumentu
+  const mapToForm = {
+    reklamacja: 'reklamacja',
+    odwolanie: 'odwolanie',
+    najmu: 'wypowiedzenie',
+    uzasadnienie: 'uzasadnienie',
+  };
+  const formKey = mapToForm[key] || null;
+  document.getElementById('overlay').classList.remove('active');
+  openPdfGenerator(formKey);
+}, true); // capture=true żeby nadpisać poprzedni handler
 </script>
 </body>
 </html>
