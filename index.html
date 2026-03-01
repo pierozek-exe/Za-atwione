@@ -7,993 +7,885 @@
   <meta name="description" content="Sprawy urzędowe krok po kroku. Dokumenty, checklisty, terminy i kalkulatory." />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg:#f8fafc;
-      --card:#ffffff;
-      --muted:#64748b;
-      --text:#0f172a;
-      --line:#e2e8f0;
-      --accent:#0ea5e9;
-      --accent2:#8b5cf6;
-      --good:#10b981;
-      --warn:#f59e0b;
-      --bad:#ef4444;
-      --shadow: 0 4px 20px rgba(0,0,0,.08);
-      --shadow-lg: 0 10px 40px rgba(0,0,0,.12);
-      --radius: 16px;
-      --radius2: 12px;
-      --max: 1120px;
-      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      --body-bg: linear-gradient(135deg, #f0f9ff 0%, #faf5ff 100%);
-      --nav-bg: rgba(255,255,255,.98);
-      --input-bg: #f8fafc;
-      --choice-bg: #f8fafc;
-      --result-bg: #f8fafc;
-      --upcoming-bg: #f8fafc;
-      --modal-bg: #ffffff;
-      --modal-header-bg: #ffffff;
+    :root {
+      --bg: #ffffff;
+      --surface: #fafafa;
+      --card: #ffffff;
+      --text: #09090b;
+      --text-secondary: #71717a;
+      --text-tertiary: #a1a1aa;
+      --border: #e4e4e7;
+      --border-strong: #d4d4d8;
+      --muted-bg: #f4f4f5;
+      --accent: #18181b;
+      --accent-fg: #fafafa;
+      --good: #16a34a;
+      --good-bg: #f0fdf4;
+      --good-border: #bbf7d0;
+      --warn: #b45309;
+      --warn-bg: #fffbeb;
+      --warn-border: #fde68a;
+      --bad: #dc2626;
+      --bad-bg: #fef2f2;
+      --bad-border: #fecaca;
+      --r: 8px;
+      --r-sm: 6px;
+      --max: 1100px;
+      --font: 'Geist', ui-sans-serif, system-ui, sans-serif;
+      --mono: 'Geist Mono', ui-monospace, monospace;
     }
-
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg:#1e293b;
-        --card:#0f172a;
-        --muted:#94a3b8;
-        --text:#f1f5f9;
-        --line:#334155;
-        --accent:#38bdf8;
-        --accent2:#a78bfa;
-        --good:#34d399;
-        --warn:#fbbf24;
-        --bad:#f87171;
-        --shadow: 0 4px 20px rgba(0,0,0,.4);
-        --shadow-lg: 0 10px 40px rgba(0,0,0,.5);
-        --body-bg: linear-gradient(135deg, #0f172a 0%, #1a0f2e 100%);
-        --nav-bg: rgba(15,23,42,.98);
-        --input-bg: #1e293b;
-        --choice-bg: #1e293b;
-        --result-bg: #1e293b;
-        --upcoming-bg: #1e293b;
-        --modal-bg: #0f172a;
-        --modal-header-bg: #0f172a;
+        --bg: #09090b;
+        --surface: #0f0f11;
+        --card: #18181b;
+        --text: #fafafa;
+        --text-secondary: #a1a1aa;
+        --text-tertiary: #52525b;
+        --border: #27272a;
+        --border-strong: #3f3f46;
+        --muted-bg: #1c1c1f;
+        --accent: #fafafa;
+        --accent-fg: #09090b;
+        --good: #4ade80;
+        --good-bg: rgba(74,222,128,.06);
+        --good-border: rgba(74,222,128,.2);
+        --warn: #fbbf24;
+        --warn-bg: rgba(251,191,36,.06);
+        --warn-border: rgba(251,191,36,.2);
+        --bad: #f87171;
+        --bad-bg: rgba(248,113,113,.06);
+        --bad-border: rgba(248,113,113,.2);
       }
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%; margin:0}
-    body{
-      font-family:var(--font);
-      color:var(--text);
-      background: var(--body-bg);
-      line-height:1.5;
-      letter-spacing:.2px;
-    }
-    a{color:inherit; text-decoration:none}
-    button,input{font:inherit}
-    .wrap{max-width:var(--max); margin:0 auto; padding:20px}
-    
-    /* === UPROSZCZONA NAWIGACJA === */
-    .nav{
-      position:sticky; top:0; z-index:20;
-      background: var(--nav-bg);
-      backdrop-filter: blur(10px);
-      border-bottom:1px solid var(--line);
-      box-shadow: 0 2px 8px rgba(0,0,0,.04);
-    }
-    .navInner{
-      display:flex; 
-      align-items:center; 
-      gap:20px; 
-      justify-content:space-between; 
-      max-width:var(--max); 
-      margin:0 auto; 
-      padding:14px 22px
-    }
-    .brand{
-      display:flex; 
-      align-items:center; 
-      gap:10px; 
-      font-weight:800; 
-      letter-spacing:.6px; 
-      color:var(--text);
-      font-size: 18px;
-    }
-    .logo{
-      width:38px;height:38px;border-radius:10px;
-      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
-      box-shadow: 0 4px 12px rgba(14,165,233,.25);
-      display:grid;place-items:center;
-    }
-    .logo svg{opacity:.95; color:white}
-    
-    /* Tylko 3 główne linki */
-    .navLinks{
-      display:flex; 
-      gap:8px; 
-      align-items:center;
-    }
-    @media (max-width: 768px){ 
-      .navLinks{display:none} 
-      .mobileMenuBtn{display:block}
-    }
-    .navLink{
-      padding:10px 18px;
-      border-radius:10px;
-      color:var(--muted);
-      transition:.2s ease;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 15px;
-    }
-    .navLink:hover{
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+    html { height: 100% }
+    body {
+      font-family: var(--font);
       background: var(--bg);
-      color:var(--accent);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100%;
+      -webkit-font-smoothing: antialiased;
     }
-    .navLink.active{
-      background: rgba(14,165,233,.1);
-      color:var(--accent);
-      font-weight: 700;
+    a { color: inherit; text-decoration: none }
+    button, input, select, textarea { font: inherit }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 5px; height: 5px }
+    ::-webkit-scrollbar-track { background: transparent }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px }
+
+    /* ─── LAYOUT ─── */
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 20px }
+
+    /* ─── NAV ─── */
+    .nav {
+      position: sticky; top: 0; z-index: 50;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,.9);
+      backdrop-filter: blur(16px);
     }
-    
-    .cta{
-      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
-      color:white;
-      border:0;
-      padding:12px 24px;
-      border-radius:10px;
-      font-weight:700;
-      box-shadow: 0 4px 12px rgba(14,165,233,.25);
-      cursor:pointer;
-      transition:.2s ease;
-      white-space:nowrap;
-      font-size: 15px;
+    @media (prefers-color-scheme: dark) {
+      .nav { background: rgba(9,9,11,.9) }
     }
-    .cta:hover{
-      transform: translateY(-2px); 
-      box-shadow: 0 6px 16px rgba(14,165,233,.35)
+    .navInner {
+      max-width: var(--max); margin: 0 auto;
+      height: 52px; padding: 0 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
     }
-    
-    .mobileMenuBtn{display:none}
-    
-    /* === LEPSZY HERO Z WYRAŹNYM CTA === */
-    .hero{
-      padding:50px 0 30px; 
-      text-align:center;
-      max-width: 800px;
+    .brand {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 600; letter-spacing: -.2px; color: var(--text);
+    }
+    .logo {
+      width: 26px; height: 26px; border-radius: 6px;
+      background: var(--text); color: var(--bg);
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .logo svg { display: block }
+    .navLinks { display: flex; align-items: center; gap: 1px }
+    @media (max-width: 768px) { .navLinks { display: none } }
+    .navLink {
+      height: 34px; padding: 0 12px;
+      border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer; transition: all .15s;
+      display: inline-flex; align-items: center;
+    }
+    .navLink:hover { background: var(--muted-bg); color: var(--text) }
+    .navLink.active { background: var(--muted-bg); color: var(--text); font-weight: 600 }
+    .cta {
+      height: 34px; padding: 0 14px;
+      background: var(--text); color: var(--accent-fg);
+      border: none; border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: opacity .15s;
+      display: inline-flex; align-items: center; gap: 6px;
+      white-space: nowrap;
+    }
+    .cta:hover { opacity: .85 }
+    .mobileMenuBtn { display: none }
+
+    /* ─── HERO ─── */
+    .hero {
+      text-align: center;
+      padding: 80px 20px 56px;
+      max-width: 560px;
       margin: 0 auto;
     }
-    .h1{
-      font-size: clamp(36px, 6vw, 58px);
-      line-height:1.1;
-      margin:0 0 16px;
-      letter-spacing:-.8px;
-      font-weight: 900;
-      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    .heroBadge {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 26px; padding: 0 12px;
+      background: var(--muted-bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 11px; font-weight: 500; color: var(--text-secondary);
+      margin-bottom: 24px;
+      letter-spacing: .2px;
     }
-    .sub{
-      color:var(--muted); 
-      font-size: 18px; 
-      margin:0 auto 32px; 
-      max-width:55ch;
-      line-height: 1.6;
-      font-weight: 500;
-    }
-    
-    /* Główny CTA w Hero */
-    .heroActions{
-      display:flex;
-      gap:12px;
-      justify-content:center;
-      align-items:center;
-      flex-wrap:wrap;
-      margin-bottom: 40px;
-    }
-    .primaryCta{
-      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
-      color:white;
-      border:0;
-      padding:16px 32px;
-      border-radius:12px;
-      font-weight:700;
-      font-size: 17px;
-      box-shadow: 0 6px 20px rgba(14,165,233,.3);
-      cursor:pointer;
-      transition:.2s ease;
-    }
-    .primaryCta:hover{
-      transform: translateY(-3px); 
-      box-shadow: 0 8px 24px rgba(14,165,233,.4)
-    }
-    .secondaryCta{
-      border:2px solid var(--line);
-      background: var(--card);
-      color:var(--text);
-      padding:15px 28px;
-      border-radius:12px;
-      cursor:pointer;
-      transition:.2s ease;
-      font-weight:600;
-      font-size: 16px;
-    }
-    .secondaryCta:hover{
-      border-color:var(--accent); 
-      color:var(--accent);
-      transform: translateY(-2px);
-    }
-    
-    /* === SEKCJE (TABS) === */
-    .sections{
-      max-width: var(--max);
-      margin: 0 auto 40px;
-    }
-    .section{
-      display:none;
-    }
-    .section.active{
-      display:block;
-    }
-    
-    /* === WIZUALNY KALENDARZ === */
-    .calendarSection{
-      background: var(--card);
-      border:1px solid var(--line);
-      border-radius: var(--radius);
-      padding:24px;
-      box-shadow: var(--shadow);
-      margin-bottom: 30px;
-    }
-    .calendarHeader{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom: 20px;
-    }
-    .calendarTitle{
-      font-size: 20px;
+    .h1 {
+      font-size: clamp(28px, 5vw, 46px);
       font-weight: 800;
-      margin:0;
+      letter-spacing: -1.2px;
+      line-height: 1.08;
+      color: var(--text);
+      margin-bottom: 16px;
     }
-    .calendarNav{
-      display:flex;
-      gap:8px;
+    .sub {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      max-width: 44ch;
+      margin: 0 auto 28px;
+      font-weight: 400;
     }
-    .calendarNav button{
-      background: var(--bg);
-      border:1px solid var(--line);
-      border-radius:8px;
-      padding:8px 12px;
-      cursor:pointer;
-      font-weight:600;
-      transition:.2s;
-      color:var(--text);
+    .heroActions {
+      display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
     }
-    .calendarNav button:hover{
+    .primaryCta {
+      height: 38px; padding: 0 18px;
+      background: var(--text); color: var(--accent-fg);
+      border: none; border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: opacity .15s;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .primaryCta:hover { opacity: .85 }
+    .secondaryCta {
+      height: 38px; padding: 0 18px;
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: background .15s;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .secondaryCta:hover { background: var(--muted-bg) }
+
+    /* ─── SECTIONS ─── */
+    .sections { max-width: var(--max); margin: 0 auto 60px }
+    .section { display: none }
+    .section.active { display: block }
+
+    /* ─── CALENDAR ─── */
+    .calendarSection {
       background: var(--card);
-      border-color:var(--accent);
-      color:var(--accent);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 20px;
+      margin-bottom: 12px;
     }
-    
-    .calendar{
-      display:grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap:4px;
-      margin-top:16px;
+    .calendarHeader {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
     }
-    .calDay{
+    .calendarTitle { font-size: 14px; font-weight: 600; letter-spacing: -.2px }
+    .calendarNav { display: flex; gap: 4px }
+    .calendarNav button {
+      height: 28px; width: 28px;
+      background: transparent; border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      font-size: 13px; cursor: pointer; color: var(--text);
+      transition: background .12s; display: grid; place-items: center;
+    }
+    .calendarNav button:hover { background: var(--muted-bg) }
+    .calendar {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+    }
+    .calDay {
       aspect-ratio: 1;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:8px;
-      font-size:14px;
-      font-weight:600;
-      position:relative;
-      cursor:pointer;
-      transition:.2s;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 400;
+      position: relative; cursor: pointer; transition: background .1s;
     }
-    .calDay.header{
-      color:var(--muted);
-      font-size:12px;
-      font-weight:700;
-      cursor:default;
-      text-transform: uppercase;
+    .calDay.header {
+      color: var(--text-tertiary); font-size: 10px; font-weight: 600;
+      cursor: default; text-transform: uppercase; letter-spacing: .4px;
     }
-    .calDay.other{
-      color:var(--line);
+    .calDay.other { color: var(--border-strong) }
+    .calDay:not(.header):not(.other):hover { background: var(--muted-bg) }
+    .calDay.today {
+      background: var(--text); color: var(--accent-fg);
+      font-weight: 700; border-radius: 50%;
     }
-    .calDay:not(.header):not(.other):hover{
-      background: var(--bg);
+    .calDay.hasDeadline {
+      background: var(--warn-bg); color: var(--warn);
+      font-weight: 600; border: 1px solid var(--warn-border);
     }
-    .calDay.today{
-      background: rgba(14,165,233,.1);
-      color:var(--accent);
-      font-weight:800;
+    .calDay.hasDeadline.high {
+      background: var(--bad-bg); color: var(--bad); border-color: var(--bad-border);
     }
-    .calDay.hasDeadline{
-      background: linear-gradient(135deg, #fef3c7, #fde68a);
-      color:#92400e;
-      font-weight:800;
+    .dot {
+      position: absolute; bottom: 3px;
+      width: 3px; height: 3px;
+      border-radius: 50%; background: currentColor;
     }
-    .calDay.hasDeadline.high{
-      background: linear-gradient(135deg, #fecaca, #fca5a5);
-      color:#991b1b;
-    }
-    .calDay.hasDeadline.done{
-      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-      color:#065f46;
-    }
-    .dot{
-      position:absolute;
-      bottom:4px;
-      width:5px;
-      height:5px;
-      border-radius:50%;
-      background:currentColor;
-    }
-    
-    /* Najbliższe terminy */
-    .upcomingBox{
-      background: var(--upcoming-bg);
-      border-radius:12px;
-      padding:16px;
-      margin-top:20px;
-    }
-    .upcomingTitle{
-      font-size:15px;
-      font-weight:700;
-      color:var(--muted);
-      margin:0 0 12px;
-      text-transform:uppercase;
-      letter-spacing:.5px;
-    }
-    .upcomingList{
-      display:grid;
-      gap:10px;
-    }
-    .upcomingItem{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:10px;
-      padding:12px 14px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      transition:.2s;
-      cursor:pointer;
-    }
-    .upcomingItem:hover{
-      border-color:var(--accent);
-      transform:translateX(4px);
-    }
-    .upcomingItem .left{
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .upcomingItem .badge{
-      font-size:11px;
-      padding:4px 10px;
-      border-radius:6px;
-      font-weight:700;
-    }
-    .upcomingItem .badge.high{background:#fecaca; color:#991b1b}
-    .upcomingItem .badge.medium{background:#fef3c7; color:#92400e}
-    .upcomingItem .badge.low{background:#dbeafe; color:#1e40af}
-    .upcomingItem .name{
-      font-weight:600;
-      font-size:15px;
-    }
-    .upcomingItem .date{
-      color:var(--muted);
-      font-size:14px;
-      font-weight:600;
-    }
-    
-    /* === FORMULARZE KROK PO KROKU === */
-    .wizardBox{
+
+    .upcomingBox {
       background: var(--card);
-      border:1px solid var(--line);
-      border-radius: var(--radius);
-      padding:30px;
-      box-shadow: var(--shadow);
-      max-width:700px;
-      margin:0 auto;
+      border: 1px solid var(--border);
+      border-radius: var(--r); padding: 16px; margin-top: 12px;
     }
-    .wizardTitle{
-      font-size:24px;
-      font-weight:800;
-      margin:0 0 8px;
+    .upcomingTitle {
+      font-size: 10px; font-weight: 600; color: var(--text-tertiary);
+      text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px;
     }
-    .wizardDesc{
-      color:var(--muted);
-      margin:0 0 24px;
-      font-size:15px;
+    .upcomingList { display: flex; flex-direction: column; gap: 1px }
+    .upcomingItem {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 9px 10px; border-radius: var(--r-sm);
+      border: 1px solid transparent; transition: .12s;
     }
-    
-    /* Progress bar */
-    .progress{
-      display:flex;
-      gap:8px;
-      margin-bottom:30px;
+    .upcomingItem:hover { background: var(--muted-bg); border-color: var(--border) }
+    .upcomingItem .left { display: flex; align-items: center; gap: 10px }
+    .upcomingItem .name { font-size: 13px; font-weight: 500 }
+    .upcomingItem .date { font-size: 12px; color: var(--text-secondary) }
+    .upcomingItem .date.urgent { color: var(--bad); font-weight: 600 }
+    .upcomingItem .date.soon { color: var(--warn); font-weight: 600 }
+
+    /* ─── PANELS ─── */
+    .wizardBox {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r); padding: 20px;
     }
-    .progressStep{
-      flex:1;
-      height:4px;
-      background:var(--line);
-      border-radius:4px;
-      transition:.3s;
+    .wizardTitle { font-size: 15px; font-weight: 600; letter-spacing: -.2px; margin-bottom: 2px }
+    .wizardDesc { font-size: 13px; color: var(--text-secondary) }
+
+    /* ─── BUTTONS ─── */
+    .btnPrimary {
+      height: 34px; padding: 0 14px;
+      background: var(--text); color: var(--accent-fg);
+      border: none; border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: opacity .15s;
+      display: inline-flex; align-items: center; gap: 6px;
+      white-space: nowrap;
     }
-    .progressStep.active{
-      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+    .btnPrimary:hover { opacity: .85 }
+    .btnPrimary:disabled { opacity: .35; cursor: not-allowed }
+    .btnSecondary {
+      height: 34px; padding: 0 14px;
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: background .15s;
+      display: inline-flex; align-items: center; gap: 6px;
+      white-space: nowrap;
     }
-    
-    .wizardStep{
-      display:none;
+    .btnSecondary:hover { background: var(--muted-bg) }
+
+    /* ─── FORM ─── */
+    .formLabel { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px }
+    .formInput, .formSelect {
+      width: 100%;
+      height: 34px; padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      background: var(--bg); color: var(--text);
+      font-size: 13px; outline: none; transition: border-color .15s;
     }
-    .wizardStep.active{
-      display:block;
-      animation: fadeIn .3s ease;
+    .formInput:focus, .formSelect:focus {
+      border-color: var(--text);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 8%, transparent);
     }
-    @keyframes fadeIn{
-      from{opacity:0; transform:translateY(10px)}
-      to{opacity:1; transform:translateY(0)}
+    textarea.formInput { height: auto; padding: 8px 10px; resize: vertical }
+
+    /* ─── CASE GRID ─── */
+    .categorySection { margin-bottom: 28px }
+    .categoryTitle {
+      font-size: 10px; font-weight: 600; color: var(--text-tertiary);
+      text-transform: uppercase; letter-spacing: .6px;
+      margin-bottom: 10px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
     }
-    
-    .formGroup{
-      margin-bottom:20px;
+    .casesGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 6px;
     }
-    .formLabel{
-      display:block;
-      font-weight:700;
-      margin-bottom:8px;
-      font-size:15px;
+    @media (max-width: 640px) {
+      .casesGrid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) }
     }
-    .formInput{
-      width:100%;
-      border:2px solid var(--line);
-      border-radius:10px;
-      padding:12px 16px;
-      font-size:15px;
-      transition:.2s;
-      background:var(--input-bg);
-      color:var(--text);
+    .caseCard {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: var(--r);
+      padding: 14px;
+      cursor: pointer; transition: all .15s;
+      display: flex; flex-direction: column; gap: 8px;
+      min-height: 90px;
     }
-    .formInput:focus{
-      outline:0;
-      border-color:var(--accent);
-      box-shadow:0 0 0 3px rgba(14,165,233,.1);
-      background:var(--card);
+    .caseCard:hover { background: var(--muted-bg); border-color: var(--border-strong) }
+    .caseCard .icon { font-size: 18px; line-height: 1 }
+    .caseCard .title {
+      font-size: 12px; font-weight: 500; color: var(--text); line-height: 1.4;
     }
-    .formSelect{
-      width:100%;
-      border:2px solid var(--line);
-      border-radius:10px;
-      padding:12px 16px;
-      font-size:15px;
-      background:var(--input-bg);
-      color:var(--text);
-      cursor:pointer;
-      transition:.2s;
+
+    /* ─── CARDS ─── */
+    .grid3 {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+      gap: 8px; margin-bottom: 32px;
     }
-    .formSelect:focus{
-      outline:0;
-      border-color:var(--accent);
-      box-shadow:0 0 0 3px rgba(14,165,233,.1);
-      background:var(--card);
+    .card {
+      border: 1px solid var(--border); background: var(--card); border-radius: var(--r);
+      padding: 16px; transition: all .15s; cursor: pointer; display: flex; flex-direction: column;
     }
-    
-    /* Przyciski wyboru (cards) */
-    .choiceGrid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
-      gap:12px;
+    .card:hover { background: var(--muted-bg); border-color: var(--border-strong) }
+    .card h3 { font-size: 14px; font-weight: 600; letter-spacing: -.2px; margin-bottom: 4px }
+    .card p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; flex: 1 }
+    .tagRow { display: flex; gap: 4px; margin-top: 10px; flex-wrap: wrap }
+    .tag {
+      height: 20px; padding: 0 8px;
+      font-size: 11px; color: var(--text-secondary);
+      border: 1px solid var(--border); border-radius: 999px;
+      background: var(--muted-bg); font-weight: 500;
+      display: inline-flex; align-items: center;
     }
-    .choiceCard{
-      border:2px solid var(--line);
-      background:var(--choice-bg);
-      border-radius:12px;
-      padding:16px;
-      cursor:pointer;
-      transition:.2s;
-      text-align:center;
+
+    /* ─── BADGES ─── */
+    .badge {
+      display: inline-flex; align-items: center;
+      height: 20px; padding: 0 8px;
+      border-radius: 999px; font-size: 11px; font-weight: 500;
+      border: 1px solid;
     }
-    .choiceCard:hover{
-      border-color:var(--accent);
-      background:var(--card);
-      transform:translateY(-2px);
+    .badge.good { background: var(--good-bg); color: var(--good); border-color: var(--good-border) }
+    .badge.warn { background: var(--warn-bg); color: var(--warn); border-color: var(--warn-border) }
+    .badge.bad  { background: var(--bad-bg);  color: var(--bad);  border-color: var(--bad-border) }
+    .badge.high { background: var(--bad-bg);  color: var(--bad);  border-color: var(--bad-border) }
+    .badge.medium { background: var(--warn-bg); color: var(--warn); border-color: var(--warn-border) }
+    .badge.low  { background: var(--good-bg); color: var(--good); border-color: var(--good-border) }
+
+    /* ─── MODAL ─── */
+    .overlay {
+      display: none; position: fixed;
+      inset: 0; z-index: 100;
+      background: rgba(0,0,0,.45);
+      backdrop-filter: blur(4px);
+      padding: 20px; overflow-y: auto;
+      align-items: flex-start; justify-content: center;
+      padding-top: 6vh;
     }
-    .choiceCard.selected{
-      border-color:var(--accent);
-      background: rgba(14,165,233,.05);
-      box-shadow:0 0 0 3px rgba(14,165,233,.1);
+    .overlay.active { display: flex }
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      max-width: 840px; width: 100%;
+      box-shadow: 0 20px 40px rgba(0,0,0,.12);
+      max-height: 86vh; overflow-y: auto;
+      position: relative;
     }
-    .choiceCard .icon{
-      font-size:32px;
-      margin-bottom:8px;
+    @media (prefers-color-scheme: dark) {
+      .modal { box-shadow: 0 20px 40px rgba(0,0,0,.5) }
     }
-    .choiceCard .title{
-      font-weight:700;
-      font-size:15px;
-      margin:0;
+    .modalHeader {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0;
+      background: var(--card); z-index: 10;
     }
-    
-    .wizardActions{
-      display:flex;
-      gap:12px;
-      margin-top:30px;
-      justify-content:space-between;
+    .modalTitle { font-size: 17px; font-weight: 700; letter-spacing: -.3px; margin-bottom: 3px }
+    .modalMeta { font-size: 12px; color: var(--text-secondary) }
+    .closeModal {
+      position: absolute; top: 14px; right: 14px;
+      width: 28px; height: 28px;
+      background: transparent; border: 1px solid var(--border);
+      border-radius: var(--r-sm); cursor: pointer;
+      display: grid; place-items: center; transition: background .12s;
+      font-size: 14px; color: var(--text-secondary); line-height: 1;
     }
-    .btnSecondary{
-      border:2px solid var(--line);
-      background:var(--card);
-      color:var(--text);
-      padding:12px 24px;
-      border-radius:10px;
-      font-weight:600;
-      cursor:pointer;
-      transition:.2s;
+    .closeModal:hover { background: var(--muted-bg); color: var(--text) }
+    .modalBody { padding: 20px 24px }
+    .modalSection { margin-bottom: 24px }
+    .modalSectionTitle {
+      font-size: 10px; font-weight: 600; color: var(--text-tertiary);
+      text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px;
     }
-    .btnSecondary:hover{
-      border-color:var(--accent);
-      color:var(--accent);
+
+    /* ─── STEPS ─── */
+    .step {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
     }
-    .btnPrimary{
-      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
-      color:white;
-      border:0;
-      padding:12px 28px;
-      border-radius:10px;
-      font-weight:700;
-      cursor:pointer;
-      transition:.2s;
-      box-shadow: 0 4px 12px rgba(14,165,233,.25);
+    .step:last-child { border-bottom: none }
+    .num {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--muted-bg); border: 1px solid var(--border);
+      color: var(--text); display: grid; place-items: center;
+      font-weight: 700; font-size: 11px; flex-shrink: 0; font-family: var(--mono);
     }
-    .btnPrimary:hover{
-      transform:translateY(-2px);
-      box-shadow: 0 6px 16px rgba(14,165,233,.35);
+    .step > div:last-child { flex: 1; padding-top: 2px }
+    .step b { display: block; margin-bottom: 2px; font-size: 13px; font-weight: 600 }
+    .step span { color: var(--text-secondary); font-size: 12px }
+
+    /* ─── CHECKS ─── */
+    .check { margin-bottom: 3px }
+    .check label {
+      display: flex; gap: 10px; align-items: center;
+      cursor: pointer; padding: 7px 9px;
+      border-radius: var(--r-sm); transition: background .1s;
     }
-    .btnPrimary:disabled{
-      opacity:.5;
-      cursor:not-allowed;
-      transform:none;
+    .check label:hover { background: var(--muted-bg) }
+    .check input { width: 15px; height: 15px; cursor: pointer; accent-color: var(--text); flex-shrink: 0 }
+    .check .small { font-size: 13px; line-height: 1.4 }
+
+    /* ─── RESULT / INFO ─── */
+    .resultBox {
+      background: var(--muted-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r); padding: 14px; margin-top: 14px;
     }
-    
-    /* === LISTA SPRAW - KAFELKI === */
-    .categorySection{
-      margin-bottom:30px;
+    .resultText { font-size: 13px; line-height: 1.6 }
+
+    .mistakes { list-style: none }
+    .mistakes li {
+      padding: 9px 11px;
+      background: var(--bad-bg);
+      border-left: 2px solid var(--bad);
+      margin-bottom: 5px; border-radius: 0 var(--r-sm) var(--r-sm) 0;
+      font-size: 12px; color: var(--text);
     }
-    .categoryTitle{
-      font-size:17px;
-      font-weight:800;
-      color:var(--accent);
-      margin:0 0 16px;
-      padding-bottom:12px;
-      border-bottom:2px solid var(--line);
-      letter-spacing:.3px;
+    .infoBox {
+      background: var(--muted-bg); border-left: 2px solid var(--border);
+      padding: 11px; border-radius: 0 var(--r-sm) var(--r-sm) 0;
+      font-size: 12px; line-height: 1.6; color: var(--text-secondary);
     }
-    .casesGrid{
-      display:grid;
-      grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
-      gap:12px;
+    .modalActions {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);
     }
-    @media (max-width: 768px){
-      .casesGrid{
-        grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
+
+    /* ─── GOV LINKS ─── */
+    .govLinks {
+      background: var(--muted-bg); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 14px; margin-bottom: 20px;
+    }
+    .govLinksList { display: flex; flex-direction: column; gap: 4px }
+    .govLink {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 11px; background: var(--card);
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      color: var(--text); font-size: 13px;
+      cursor: pointer; transition: all .12s; text-decoration: none;
+    }
+    .govLink:hover { background: var(--muted-bg); border-color: var(--border-strong) }
+    .govLink .govLinkIcon { font-size: 15px; flex-shrink: 0 }
+    .govLink .govLinkText { flex: 1 }
+    .govLink .govLinkText strong { display: block; font-size: 12px; font-weight: 500 }
+    .govLink .govLinkText span { font-size: 11px; color: var(--text-secondary); font-weight: 400 }
+    .govLink .govLinkArrow { font-size: 12px; color: var(--text-tertiary) }
+
+    /* ─── SPRAWY LIST ─── */
+    .sprawaNone {
+      text-align: center; padding: 48px 20px;
+      color: var(--text-secondary); font-size: 13px;
+    }
+    .sprawaNone .icon { font-size: 32px; margin-bottom: 10px; opacity: .4 }
+    .sprawaItem {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; margin-bottom: 4px;
+      border: 1px solid var(--border); background: var(--card);
+      border-radius: var(--r); transition: background .12s;
+    }
+    .sprawaItem:hover { background: var(--muted-bg) }
+    .sprawaItem.done { opacity: .45 }
+    .sprawaItem.done .sprawaName { text-decoration: line-through }
+    .sprawaItem.overdue { border-color: var(--bad-border); background: var(--bad-bg) }
+    .sprawaItem .sprawaPrioBadge {
+      font-size: 10px; padding: 2px 7px; border-radius: 999px;
+      font-weight: 500; flex-shrink: 0; border: 1px solid;
+    }
+    .sprawaItem .sprawaInfo { flex: 1; min-width: 0 }
+    .sprawaItem .sprawaName { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+    .sprawaItem .sprawaNote { font-size: 11px; color: var(--text-secondary) }
+    .sprawaItem .sprawaDate { font-size: 11px; color: var(--text-secondary); flex-shrink: 0; white-space: nowrap }
+    .sprawaItem .sprawaDate.urgent { color: var(--bad); font-weight: 600 }
+    .sprawaItem .sprawaDate.soon  { color: var(--warn); font-weight: 600 }
+    .sprawaItem .sprawaBtns { display: flex; gap: 4px; flex-shrink: 0 }
+    .sprawaBtn {
+      height: 26px; padding: 0 8px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text-secondary); border-radius: var(--r-sm);
+      font-size: 11px; cursor: pointer; transition: all .12s;
+      display: inline-flex; align-items: center;
+    }
+    .sprawaBtn:hover { border-color: var(--text); color: var(--text); background: var(--muted-bg) }
+    .sprawaBtn.danger:hover { border-color: var(--bad); color: var(--bad) }
+    @media (max-width: 600px) {
+      .sprawaItem { flex-wrap: wrap }
+      .sprawaItem .sprawaBtns { width: 100%; justify-content: flex-end }
+    }
+
+    /* ─── PDF OVERLAY ─── */
+    .pdfOverlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,.45); backdrop-filter: blur(4px);
+      padding: 20px; overflow-y: auto;
+      align-items: flex-start; justify-content: center; padding-top: 5vh;
+    }
+    .pdfOverlay.active { display: flex }
+    .pdfModal {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); max-width: 700px; width: 100%;
+      box-shadow: 0 20px 40px rgba(0,0,0,.12);
+      max-height: 88vh; overflow-y: auto;
+    }
+    .pdfModalHeader {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .pdfModalHeader h2 { font-size: 15px; font-weight: 600; letter-spacing: -.2px }
+    .pdfModalBody { padding: 0 }
+    .pdfTabs {
+      display: flex; gap: 0; overflow-x: auto;
+      border-bottom: 1px solid var(--border); padding: 0 16px;
+    }
+    .pdfTab {
+      padding: 10px 14px; font-size: 12px; font-weight: 500;
+      cursor: pointer; color: var(--text-secondary);
+      border-bottom: 2px solid transparent; transition: all .15s;
+      white-space: nowrap;
+    }
+    .pdfTab:hover { color: var(--text) }
+    .pdfTab.active { color: var(--text); border-bottom-color: var(--text) }
+    .pdfForm { padding: 16px 20px; display: none }
+    .pdfForm.active { display: block }
+    .pdfField { margin-bottom: 14px }
+    .pdfFieldGroup { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px }
+    @media (max-width: 560px) { .pdfFieldGroup { grid-template-columns: 1fr } }
+    .pdfHint { font-size: 11px; color: var(--text-secondary); margin-top: 4px }
+    .pdfPreviewBox {
+      background: var(--muted-bg); border: 1px solid var(--border);
+      border-radius: var(--r-sm); padding: 12px;
+      font-size: 11px; font-family: var(--mono);
+      white-space: pre-wrap; line-height: 1.6;
+      color: var(--text-secondary); max-height: 240px; overflow-y: auto;
+      margin-bottom: 12px; display: none;
+    }
+    .pdfActions {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      padding: 14px 20px; border-top: 1px solid var(--border);
+    }
+    .pdfSuccess {
+      text-align: center; padding: 40px 20px;
+      display: none;
+    }
+    .pdfSuccess .icon { font-size: 40px; margin-bottom: 12px }
+    .pdfSuccess h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px }
+    .pdfSuccess p { font-size: 13px; color: var(--text-secondary) }
+
+    /* ─── SAVE PANEL (modal) ─── */
+    #savePanel {
+      background: var(--muted-bg); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 16px; margin-top: 12px;
+    }
+    #savePanel .formField { margin-bottom: 12px }
+    #savePanel h4 { font-size: 13px; font-weight: 600; margin-bottom: 12px }
+
+    /* ─── STAT ROW ─── */
+    .statRow {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr));
+      gap: 8px; margin-bottom: 16px;
+    }
+    .statCard {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 14px 16px;
+    }
+    .statCard .statNum { font-size: 24px; font-weight: 700; letter-spacing: -.5px; font-family: var(--mono); margin-bottom: 2px }
+    .statCard .statLabel { font-size: 11px; color: var(--text-secondary) }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      .hero { padding: 48px 20px 36px }
+      .h1 { font-size: 28px; letter-spacing: -.8px }
+      .grid3 { grid-template-columns: 1fr }
+    }
+    @media (max-width: 480px) {
+      .heroActions { flex-direction: column }
+      .primaryCta, .secondaryCta { width: 100%; justify-content: center }
+    }
+    /* ─── ANIMATIONS ────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(12px) }
+      to   { opacity:1; transform:translateY(0) }
+    }
+    @keyframes fadeIn {
+      from { opacity:0 } to { opacity:1 }
+    }
+    @keyframes scaleUp {
+      from { opacity:0; transform:scale(.95) translateY(8px) }
+      to   { opacity:1; transform:scale(1) translateY(0) }
+    }
+    @keyframes slideDown {
+      from { opacity:0; transform:translateY(-6px) }
+      to   { opacity:1; transform:translateY(0) }
+    }
+    @keyframes ripple {
+      to { transform:scale(4); opacity:0 }
+    }
+    @keyframes checkPop {
+      0%  { transform:scale(1) }
+      45% { transform:scale(1.22) }
+      100%{ transform:scale(1) }
+    }
+    @keyframes staggerFade {
+      from { opacity:0; transform:translateX(-6px) }
+      to   { opacity:1; transform:translateX(0) }
+    }
+
+    /* Hero entrance */
+    .heroBadge { animation: slideDown .4s .05s cubic-bezier(.22,.68,0,1.2) both }
+    .h1         { animation: fadeUp .5s .08s cubic-bezier(.22,.68,0,1.2) both }
+    .sub        { animation: fadeUp .45s .18s ease both }
+    .heroActions{ animation: fadeUp .4s .28s ease both }
+
+    /* Modal overlay and panel */
+    .overlay { transition: background .2s }
+    .overlay.active { animation: fadeIn .18s ease both }
+    .overlay.active .modal {
+      animation: scaleUp .24s cubic-bezier(.22,.68,0,1.2) both;
+    }
+    .overlay.closing { animation: fadeIn .16s ease reverse both }
+    .overlay.closing .modal { animation: scaleUp .16s ease reverse both }
+
+    /* PDF modal */
+    .pdfOverlay { transition: background .2s }
+    .pdfOverlay.active { animation: fadeIn .18s ease both }
+    .pdfOverlay.active .pdfModal {
+      animation: scaleUp .24s cubic-bezier(.22,.68,0,1.2) both;
+    }
+    .pdfOverlay.closing { animation: fadeIn .16s ease reverse both }
+    .pdfOverlay.closing .pdfModal { animation: scaleUp .16s ease reverse both }
+
+    /* Case cards stagger */
+    .caseCard {
+      transition: background .15s, border-color .15s,
+                  transform .18s cubic-bezier(.22,.68,0,1.2), box-shadow .18s;
+      animation: fadeUp .28s ease both;
+    }
+    .caseCard:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0,0,0,.07);
+    }
+    .caseCard:active { transform: translateY(-1px) scale(.99) }
+    @media(prefers-color-scheme:dark) {
+      .caseCard:hover { box-shadow: 0 6px 16px rgba(0,0,0,.35) }
+    }
+    .casesGrid .caseCard:nth-child(1)  { animation-delay:.02s }
+    .casesGrid .caseCard:nth-child(2)  { animation-delay:.05s }
+    .casesGrid .caseCard:nth-child(3)  { animation-delay:.08s }
+    .casesGrid .caseCard:nth-child(4)  { animation-delay:.11s }
+    .casesGrid .caseCard:nth-child(5)  { animation-delay:.14s }
+    .casesGrid .caseCard:nth-child(6)  { animation-delay:.17s }
+    .casesGrid .caseCard:nth-child(n+7){ animation-delay:.20s }
+
+    /* Modal steps stagger */
+    #modalSteps .step { animation: staggerFade .22s ease both }
+    #modalSteps .step:nth-child(1){ animation-delay:.06s }
+    #modalSteps .step:nth-child(2){ animation-delay:.10s }
+    #modalSteps .step:nth-child(3){ animation-delay:.14s }
+    #modalSteps .step:nth-child(4){ animation-delay:.18s }
+    #modalSteps .step:nth-child(5){ animation-delay:.22s }
+    #modalSteps .step:nth-child(n+6){ animation-delay:.26s }
+
+    /* Checklist items */
+    #checks .check { animation: staggerFade .2s ease both }
+    #checks .check:nth-child(1){ animation-delay:.08s }
+    #checks .check:nth-child(2){ animation-delay:.12s }
+    #checks .check:nth-child(3){ animation-delay:.16s }
+    #checks .check:nth-child(4){ animation-delay:.20s }
+    #checks .check:nth-child(n+5){ animation-delay:.24s }
+    .check input:checked { animation: checkPop .2s cubic-bezier(.22,.68,0,1.2) }
+
+    /* Gov links stagger */
+    #govLinksList .govLink { animation: staggerFade .2s ease both }
+    #govLinksList .govLink:nth-child(1){ animation-delay:.05s }
+    #govLinksList .govLink:nth-child(2){ animation-delay:.10s }
+    #govLinksList .govLink:nth-child(3){ animation-delay:.15s }
+    #govLinksList .govLink:nth-child(n+4){ animation-delay:.18s }
+    .govLink { transition: background .13s, border-color .13s, transform .13s }
+    .govLink:hover { transform: translateX(3px) }
+
+    /* Badge */
+    #badge { transition: background .25s, color .25s, border-color .25s }
+    .resultBox { transition: background .2s, border-color .2s }
+
+    /* Sprawy list */
+    .sprawaItem {
+      animation: fadeUp .2s ease both;
+      transition: background .12s, border-color .12s;
+    }
+
+    /* Upcoming items */
+    #upcomingList .upcomingItem { animation: staggerFade .18s ease both }
+    #upcomingList .upcomingItem:nth-child(1){ animation-delay:.04s }
+    #upcomingList .upcomingItem:nth-child(2){ animation-delay:.08s }
+    #upcomingList .upcomingItem:nth-child(3){ animation-delay:.12s }
+    #upcomingList .upcomingItem:nth-child(n+4){ animation-delay:.15s }
+    .upcomingItem { transition: background .12s, border-color .12s }
+
+    /* Save panel */
+    #savePanel { animation: slideDown .22s cubic-bezier(.22,.68,0,1.2) both }
+
+    /* PDF tabs */
+    .pdfForm.active { animation: fadeIn .16s ease both }
+    .pdfTab { transition: color .15s, border-bottom-color .15s }
+
+    /* Calendar days */
+    .calDay:not(.header):not(.other) {
+      transition: background .1s, color .1s, transform .12s;
+    }
+    .calDay:not(.header):not(.other):hover { transform: scale(1.12) }
+    .calDay.today { transition: all .2s }
+
+    /* Nav */
+    .navLink { transition: background .15s, color .15s }
+
+    /* Ripple on buttons */
+    .btnPrimary, .btnSecondary, .primaryCta, .secondaryCta, .cta {
+      position: relative; overflow: hidden;
+    }
+    .ripple {
+      position: absolute; border-radius: 50%;
+      transform: scale(0);
+      animation: ripple .55s linear;
+      pointer-events: none;
+      width: 80px; height: 80px;
+      margin-top: -40px; margin-left: -40px;
+    }
+    .btnPrimary .ripple, .primaryCta .ripple, .cta .ripple {
+      background: rgba(255,255,255,.22);
+    }
+    .btnSecondary .ripple, .secondaryCta .ripple {
+      background: rgba(0,0,0,.07);
+    }
+    @media(prefers-color-scheme:dark){
+      .btnSecondary .ripple, .secondaryCta .ripple {
+        background: rgba(255,255,255,.1);
       }
     }
-    .caseCard{
-      border:2px solid var(--line);
-      background:var(--choice-bg);
-      border-radius:12px;
-      padding:16px;
-      cursor:pointer;
-      transition:.2s;
-      text-align:center;
-      min-height:120px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
+
+    /* Button press */
+    .btnPrimary:active, .primaryCta:active, .cta:active {
+      transform: scale(.97); transition: transform .07s;
     }
-    .caseCard:hover{
-      border-color:var(--accent);
-      background:var(--card);
-      transform:translateY(-3px);
-      box-shadow:0 6px 16px rgba(14,165,233,.15);
+    .btnSecondary:active, .secondaryCta:active {
+      transform: scale(.97); transition: transform .07s;
     }
-    .caseCard .icon{
-      font-size:32px;
-      line-height:1;
-    }
-    .caseCard .title{
-      font-weight:600;
-      font-size:14px;
-      margin:0;
-      line-height:1.3;
-      color:var(--text);
-    }
-    
-    /* === KARTY SPRAW === */
-    .grid3{
-      display:grid; 
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-      gap:16px;
-      margin-bottom:40px;
-    }
-    .card{
-      border:1px solid var(--line);
+    .sprawaBtn { transition: background .12s, border-color .12s, color .12s }
+    .sprawaBtn:active { transform: scale(.93) }
+    /* ─── LANDING PAGE ───────────────────────────────────── */
+    #section-home { animation: fadeUp .45s ease both }
+
+    .landingCard {
+      border: 1px solid var(--border);
       background: var(--card);
-      border-radius: var(--radius2);
-      padding:20px;
-      transition:.2s ease;
-      cursor:pointer;
-      min-height:140px;
+      border-radius: var(--r);
+      padding: 28px 24px;
+      height: 100%;
       display: flex;
       flex-direction: column;
+      gap: 10px;
+      transition: border-color .15s, background .15s, transform .18s cubic-bezier(.22,.68,0,1.2), box-shadow .18s;
+      text-align: left;
     }
-    .card:hover{
-      transform: translateY(-4px); 
-      border-color:var(--accent);
-      box-shadow: 0 8px 24px rgba(14,165,233,.15);
+    .landingCard:hover {
+      border-color: var(--border-strong);
+      background: var(--muted-bg);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,.07);
     }
-    .card h3{
-      margin:0 0 8px; 
-      font-size:17px; 
-      letter-spacing:-.2px; 
+    @media(prefers-color-scheme:dark) {
+      .landingCard:hover { box-shadow: 0 8px 24px rgba(0,0,0,.35) }
+    }
+    .landingCard:active { transform: translateY(-1px) }
+
+    .landingCardIcon {
+      font-size: 32px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .landingCardTitle {
+      font-size: 18px;
       font-weight: 700;
+      letter-spacing: -.3px;
+      color: var(--text);
     }
-    .card p{
-      margin:0; 
-      color:var(--muted); 
-      font-size:14px; 
-      line-height: 1.5; 
+    .landingCardDesc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.55;
       flex: 1;
     }
-    .tagRow{
-      display:flex; 
-      gap:8px; 
-      margin-top:12px; 
-      flex-wrap:wrap;
+    .landingCardArrow {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      margin-top: 8px;
     }
-    .tag{
-      font-size:11px; 
-      color:var(--accent); 
-      border:1px solid rgba(14,165,233,.3); 
-      padding:4px 10px; 
-      border-radius:999px; 
-      background: rgba(14,165,233,.05);
-      font-weight: 600;
-    }
-    
-    /* === MODAL === */
-    .overlay{
-      display:none;
-      position:fixed;
-      top:0;left:0;right:0;bottom:0;
-      background: rgba(15,23,42,.7);
-      backdrop-filter:blur(4px);
-      z-index:100;
-      padding:20px;
-      overflow-y:auto;
-      align-items:center;
-      justify-content:center;
-    }
-    .overlay.active{display:flex}
-    .modal{
-      background:var(--modal-bg);
-      border-radius:var(--radius);
-      max-width:900px;
-      width:100%;
-      box-shadow: var(--shadow-lg);
-      position:relative;
-      max-height:90vh;
-      overflow-y:auto;
-    }
-    .modalHeader{
-      padding:24px;
-      border-bottom:1px solid var(--line);
-      position:sticky;
-      top:0;
-      background:var(--modal-header-bg);
-      z-index:10;
-    }
-    .modalTitle{
-      font-size:24px;
-      font-weight:800;
-      margin:0 0 8px;
-    }
-    .modalMeta{
-      color:var(--muted);
-      font-size:14px;
-      margin:0;
-    }
-    .closeModal{
-      position:absolute;
-      top:20px;
-      right:20px;
-      background:var(--bg);
-      border:0;
-      width:36px;
-      height:36px;
-      border-radius:50%;
-      cursor:pointer;
-      display:grid;
-      place-items:center;
-      transition:.2s;
-      font-size:20px;
-      color:var(--muted);
-    }
-    .closeModal:hover{
-      background:var(--line);
-      color:var(--text);
-    }
-    .modalBody{
-      padding:24px;
-    }
-    .modalSection{
-      margin-bottom:30px;
-    }
-    .modalSectionTitle{
-      font-size:16px;
-      font-weight:700;
-      margin:0 0 12px;
-      color:var(--muted);
-      text-transform:uppercase;
-      letter-spacing:.5px;
-    }
-    
-    .step{
-      display:flex;
-      gap:14px;
-      margin-bottom:16px;
-    }
-    .num{
-      width:32px;
-      height:32px;
-      border-radius:50%;
-      background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
-      color:white;
-      display:grid;
-      place-items:center;
-      font-weight:800;
-      font-size:14px;
-      flex-shrink:0;
-    }
-    .step > div:last-child{
-      flex:1;
-    }
-    .step b{
-      display:block;
-      margin-bottom:4px;
-      font-size:15px;
-    }
-    .step span{
-      color:var(--muted);
-      font-size:14px;
-    }
-    
-    .check{
-      margin-bottom:10px;
-    }
-    .check label{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      cursor:pointer;
-      padding:10px;
-      border-radius:8px;
-      transition:.2s;
-    }
-    .check label:hover{
-      background:var(--bg);
-    }
-    .check input{
-      width:20px;
-      height:20px;
-      cursor:pointer;
-    }
-    .check .small{
-      font-size:14px;
-      line-height:1.4;
-    }
-    
-    .resultBox{
-      background:var(--result-bg);
-      border-radius:12px;
-      padding:20px;
-      margin-top:20px;
-    }
-    .badge{
-      display:inline-block;
-      padding:6px 14px;
-      border-radius:6px;
-      font-weight:800;
-      font-size:13px;
-      margin-bottom:10px;
-    }
-    .badge.good{background:var(--good); color:white}
-    .badge.warn{background:var(--warn); color:white}
-    .badge.bad{background:var(--bad); color:white}
-    .resultText{
-      font-size:15px;
-      line-height:1.6;
-      margin:0;
-    }
-    
-    .mistakes{
-      list-style:none;
-      padding:0;
-      margin:0;
-    }
-    .mistakes li{
-      padding:10px 14px;
-      background:rgba(239,68,68,.05);
-      border-left:3px solid var(--bad);
-      margin-bottom:8px;
-      border-radius:6px;
-      font-size:14px;
-    }
-    
-    .infoBox{
-      background:rgba(14,165,233,.05);
-      border-left:3px solid var(--accent);
-      padding:14px;
-      border-radius:6px;
-      font-size:14px;
-      line-height:1.6;
-      margin-top:12px;
-    }
-    
-    .modalActions{
-      display:flex;
-      gap:12px;
-      margin-top:24px;
-      padding-top:24px;
-      border-top:1px solid var(--line);
-      flex-wrap:wrap;
-    }
-    .govLinks{
-      background: rgba(14,165,233,.05);
-      border: 1px solid rgba(14,165,233,.2);
-      border-radius:12px;
-      padding:16px 18px;
-      margin-bottom:20px;
-    }
-    .govLinksTitle{
-      font-size:13px;
-      font-weight:700;
-      color:var(--muted);
-      text-transform:uppercase;
-      letter-spacing:.5px;
-      margin:0 0 12px;
-    }
-    .govLinksList{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-    .govLink{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 14px;
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:8px;
-      color:var(--accent);
-      font-weight:600;
-      font-size:14px;
-      cursor:pointer;
-      transition:.2s;
-      text-decoration:none;
-    }
-    .govLink:hover{
-      border-color:var(--accent);
-      background:rgba(14,165,233,.05);
-      transform:translateX(4px);
-    }
-    .govLink .govLinkIcon{ font-size:18px; flex-shrink:0; }
-    .govLink .govLinkText{ flex:1; }
-    .govLink .govLinkText strong{ display:block; font-size:14px; }
-    .govLink .govLinkText span{ font-size:12px; color:var(--muted); font-weight:400; }
-    .govLink .govLinkArrow{ font-size:16px; opacity:.5; }
 
-    /* === LISTA SPRAW (localStorage) === */
-    .sprawaNone{
-      text-align:center;
-      padding:40px 20px;
-      color:var(--muted);
-      font-size:15px;
+    .landingStat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
     }
-    .sprawaNone .icon{ font-size:48px; margin-bottom:12px; }
-    .sprawaItem{
-      border:1px solid var(--line);
-      background:var(--card);
-      border-radius:12px;
-      padding:14px 16px;
-      margin-bottom:10px;
-      display:flex;
-      align-items:center;
-      gap:12px;
-      transition:.2s;
+    .landingStat .num {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -.5px;
+      width: auto; height: auto;
+      background: none; border: none;
+      color: var(--text);
+      border-radius: 0;
+      font-family: var(--mono);
     }
-    .sprawaItem.done{
-      opacity:.55;
+    .landingStat .lbl {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 500;
     }
-    .sprawaItem.done .sprawaName{
-      text-decoration:line-through;
+    .landingStatDivider {
+      width: 1px; height: 32px;
+      background: var(--border);
+      align-self: center;
     }
-    .sprawaItem.overdue{
-      border-color:var(--bad);
-      background:rgba(239,68,68,.04);
-    }
-    .sprawaItem .sprawaPrioBadge{
-      font-size:11px;
-      padding:3px 9px;
-      border-radius:6px;
-      font-weight:700;
-      flex-shrink:0;
-    }
-    .sprawaItem .sprawaName{
-      font-weight:600;
-      font-size:15px;
-      flex:1;
-    }
-    .sprawaItem .sprawaNote{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:2px;
-    }
-    .sprawaItem .sprawaDate{
-      font-size:13px;
-      color:var(--muted);
-      font-weight:600;
-      flex-shrink:0;
-      white-space:nowrap;
-    }
-    .sprawaItem .sprawaDate.urgent{ color:var(--bad); font-weight:700; }
-    .sprawaItem .sprawaDate.soon{ color:var(--warn); font-weight:700; }
-    .sprawaItem .sprawaBtns{
-      display:flex;
-      gap:6px;
-      flex-shrink:0;
-    }
-    .sprawaBtn{
-      border:1px solid var(--line);
-      background:var(--bg);
-      color:var(--muted);
-      border-radius:7px;
-      padding:5px 9px;
-      font-size:13px;
-      cursor:pointer;
-      transition:.2s;
-    }
-    .sprawaBtn:hover{ border-color:var(--accent); color:var(--accent); background:var(--card); }
-    .sprawaBtn.danger:hover{ border-color:var(--bad); color:var(--bad); }
-    @media(max-width:600px){
-      .sprawaItem{ flex-wrap:wrap; }
-      .sprawaItem .sprawaBtns{ width:100%; justify-content:flex-end; }
-    }
-    
-    /* Responsywność */
-    @media (max-width: 768px){
-      .navInner{padding:12px 16px}
-      .hero{padding:30px 0 20px}
-      .h1{font-size:32px}
-      .sub{font-size:16px}
-      .heroActions{flex-direction:column; width:100%}
-      .primaryCta, .secondaryCta{width:100%}
-      .grid3{grid-template-columns:1fr}
-      .choiceGrid{grid-template-columns:1fr}
-      .wizardActions{flex-direction:column}
-      .btnSecondary, .btnPrimary{width:100%}
-      .calendar{gap:2px}
-      .calDay{font-size:12px}
+
+    @media (max-width: 560px) {
+      #landingCards { grid-template-columns: 1fr !important }
     }
   </style>
 </head>
@@ -1004,46 +896,83 @@
   <div class="navInner">
     <a href="#" class="brand">
       <div class="logo">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M9 11l3 3L22 4"/>
           <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
         </svg>
       </div>
-      ZAŁATWIONE
+      Załatwione
     </a>
     
     <div class="navLinks">
-      <div class="navLink active" data-section="terminy">Terminy</div>
+      <div class="navLink active" data-section="home">Start</div>
+      <div class="navLink" data-section="terminy">Terminy</div>
       <div class="navLink" data-section="sprawy">Moje sprawy</div>
     </div>
     
-    <button class="cta" onclick="openPdfGenerator(null)">📄 Generator PDF</button>
-    <button class="cta" id="addNewBtn">+ Dodaj sprawę</button>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="btnSecondary" onclick="openPdfGenerator(null)" style="font-size:12px">Generator PDF</button>
+      <button class="btnPrimary" id="addNewBtn" style="font-size:12px">+ Dodaj sprawę</button>
+    </div>
   </div>
 </nav>
 
 <div class="wrap">
-  
-  <!-- === HERO Z WYRAŹNYM CTA === -->
-  <div class="hero">
-    <h1 class="h1">Załatw sprawy urzędowe bez stresu</h1>
-    <p class="sub">Obliczaj terminy, generuj dokumenty i śledź swoje sprawy w jednym miejscu. Żadnych zawiłych procedur.</p>
-    
-    <div class="heroActions">
-      <button class="primaryCta" id="heroAddBtn">
-        ➕ Dodaj sprawę
-      </button>
-      <button class="secondaryCta" id="heroBrowseBtn">
-        📅 Moje terminy
-      </button>
+
+  <!-- === STRONA GŁÓWNA === -->
+  <div class="section active" id="section-home" style="min-height:calc(100vh - 56px);display:flex;flex-direction:column;justify-content:center;padding:40px 0 80px">
+
+    <!-- Górna część — headline -->
+    <div style="text-align:center;max-width:600px;margin:0 auto 64px">
+      <div class="heroBadge">
+        <svg width="9" height="9" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
+        Bezpłatne narzędzie dla każdego
+      </div>
+      <h1 class="h1">Załatw sprawy<br>urzędowe bez stresu</h1>
+      <p class="sub">Checklisty, terminy i dokumenty dla 53 spraw urzędowych w jednym miejscu.</p>
     </div>
+
+    <!-- Dwie główne karty akcji -->
+    <div id="landingCards" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:680px;margin:0 auto;width:100%">
+
+      <!-- KARTA: Dodaj sprawę -->
+      <button id="landingAddBtn" style="all:unset;cursor:pointer;display:block">
+        <div class="landingCard" id="landingCardAdd">
+          <div class="landingCardIcon">📋</div>
+          <div class="landingCardTitle">Dodaj sprawę</div>
+          <div class="landingCardDesc">Wybierz spośród 53 spraw urzędowych — dowód, paszport, firma, kredyt i więcej</div>
+          <div class="landingCardArrow">
+            <span>Przeglądaj sprawy</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </button>
+
+      <!-- KARTA: Moje terminy -->
+      <button id="landingCalBtn" style="all:unset;cursor:pointer;display:block">
+        <div class="landingCard" id="landingCardCal">
+          <div class="landingCardIcon">📅</div>
+          <div class="landingCardTitle">Moje terminy</div>
+          <div class="landingCardDesc">Kalendarz z Twoimi sprawami, przypomnienia i lista aktywnych terminów</div>
+          <div class="landingCardArrow">
+            <span>Otwórz kalendarz</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </button>
+
+    </div>
+
+    <!-- Statystyki inline -->
+    <div id="landingStats" style="display:flex;gap:20px;justify-content:center;margin-top:48px;flex-wrap:wrap"></div>
+
   </div>
 
   <!-- === SEKCJE === -->
   <div class="sections">
     
-    <!-- SEKCJA: TERMINY (kalendarz) -->
-    <div class="section active" id="section-terminy">
+    <!-- SEKCJA: TERMINY (kalendarz) — zawsze widoczna pod hero, nie przełączana -->
+    <div id="section-terminy">
       
       <!-- Wizualny kalendarz -->
       <div class="calendarSection">
@@ -1057,7 +986,6 @@
         </div>
         
         <div class="calendar" id="calendar">
-          <!-- Nagłówki dni tygodnia -->
           <div class="calDay header">Pn</div>
           <div class="calDay header">Wt</div>
           <div class="calDay header">Śr</div>
@@ -1065,11 +993,8 @@
           <div class="calDay header">Pt</div>
           <div class="calDay header">So</div>
           <div class="calDay header">Nd</div>
-          
-          <!-- Dni miesiąca - generowane dynamicznie -->
         </div>
         
-        <!-- Najbliższe terminy -->
         <div class="upcomingBox">
           <h3 class="upcomingTitle">Najbliższe 30 dni</h3>
           <div class="upcomingList" id="upcomingList"></div>
@@ -1078,7 +1003,7 @@
       
     </div>
     
-    <!-- SEKCJA: MOJE SPRAWY -->
+    <!-- SEKCJA: MOJE SPRAWY — ukryta domyślnie, przełączana przez nav -->
     <div class="section" id="section-sprawy">
       <div class="wizardBox">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:12px">
@@ -1398,10 +1323,10 @@
     
     <div class="modalBody">
       <div class="modalSection" id="govLinksSection">
-        <h3 class="modalSectionTitle">🔗 Załatw online / pobierz dokumenty</h3>
+        <h3 class="modalSectionTitle">Załatw online / pobierz dokumenty</h3>
         <div class="govLinks">
           <div class="govLinksList" id="govLinksList">
-            <span style="color:var(--muted); font-size:14px; font-style:italic;">Brak linków dla tej sprawy</span>
+            <span style="color:var(--text-secondary); font-size:13px; font-style:italic;">Brak linków dla tej sprawy</span>
           </div>
         </div>
       </div>
@@ -1437,38 +1362,39 @@
       </div>
       
       <div class="modalActions">
-        <button class="btnPrimary" id="genDocBtn">📄 Wygeneruj dokument</button>
-        <button class="btnSecondary" id="addToPanelBtn">💾 Zapisz sprawę</button>
+        <button class="btnPrimary" id="genDocBtn">Wygeneruj dokument</button>
+        <button class="btnSecondary" id="addToPanelBtn">Zapisz sprawę</button>
+        <button class="btnSecondary" id="setReminderBtn">🔔 Przypomnienie</button>
       </div>
 
       <!-- Panel zapisu sprawy - pojawia się po kliknięciu Zapisz -->
-      <div id="savePanel" style="display:none; margin-top:16px; padding:20px; background:var(--bg); border-radius:12px; border:1px solid var(--line)">
-        <h4 style="margin:0 0 14px; font-size:15px; font-weight:700">📅 Ustaw termin i priorytet</h4>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px">
+      <div id="savePanel" style="display:none; margin-top:14px">
+        <h4 style="margin:0 0 12px; font-size:13px; font-weight:600">Ustaw termin i priorytet</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px">
           <div>
-            <label class="formLabel" style="font-size:13px">Termin</label>
-            <input type="date" class="formInput" id="saveDate" style="font-size:14px; padding:10px 12px" />
+            <label class="formLabel">Termin</label>
+            <input type="date" class="formInput" id="saveDate" />
           </div>
           <div>
-            <label class="formLabel" style="font-size:13px">Priorytet</label>
-            <select class="formSelect" id="savePriority" style="font-size:14px; padding:10px 12px">
-              <option value="high">🔴 Wysoki</option>
-              <option value="medium" selected>🟡 Średni</option>
-              <option value="low">🔵 Niski</option>
+            <label class="formLabel">Priorytet</label>
+            <select class="formSelect" id="savePriority">
+              <option value="high">Wysoki</option>
+              <option value="medium" selected>Średni</option>
+              <option value="low">Niski</option>
             </select>
           </div>
         </div>
-        <div style="margin-bottom:14px">
-          <label class="formLabel" style="font-size:13px">Notatka (opcjonalnie)</label>
-          <input type="text" class="formInput" id="saveNote" placeholder="np. Urząd Miejski, sala 12" style="font-size:14px; padding:10px 12px" />
+        <div style="margin-bottom:12px">
+          <label class="formLabel">Notatka (opcjonalnie)</label>
+          <input type="text" class="formInput" id="saveNote" placeholder="np. Urząd Miejski, sala 12" />
         </div>
-        <div style="display:flex; gap:10px">
-          <button class="btnPrimary" id="confirmSaveBtn" style="flex:1">✅ Zapisz</button>
+        <div style="display:flex; gap:8px">
+          <button class="btnPrimary" id="confirmSaveBtn" style="flex:1">Zapisz</button>
           <button class="btnSecondary" id="cancelSaveBtn">Anuluj</button>
         </div>
       </div>
       
-      <p style="text-align:center; color:var(--muted); font-size:12px; margin:20px 0 0">
+      <p style="text-align:center; color:var(--text-secondary); font-size:12px; margin:20px 0 0">
         Stan prawny na dzień: <span id="modalAsOf"></span>
       </p>
     </div>
@@ -1588,15 +1514,16 @@
       const isOverdue = !s.done && s.date && daysLeft(s.date) < 0;
       return `
         <div class="sprawaItem ${s.done ? 'done':''} ${isOverdue ? 'overdue':''}">
-          <span class="sprawaPrioBadge" style="${PRIORITY_COLOR[s.priority]}">${PRIORITY_LABEL[s.priority]}</span>
-          <div style="flex:1; min-width:0">
+          <span class="sprawaPrioBadge badge ${s.priority}">${PRIORITY_LABEL[s.priority]}</span>
+          <div class="sprawaInfo">
             <div class="sprawaName">${escapeHtml(s.title)}</div>
             ${s.note ? `<div class="sprawaNote">${escapeHtml(s.note)}</div>` : ''}
           </div>
           <span class="sprawaDate ${dl.cls}">${dl.text}</span>
           <div class="sprawaBtns">
-            <button class="sprawaBtn" title="${s.done ? 'Oznacz jako aktywną':'Oznacz jako załatwioną'}" onclick="toggleDone(${s.id})">${s.done ? '↩':'✓'}</button>
-            <button class="sprawaBtn danger" title="Usuń" onclick="deleteSprawa(${s.id})">🗑</button>
+            <button class="sprawaBtn" title="${s.done ? 'Oznacz jako aktywną':'Oznacz jako załatwioną'}" onclick="toggleDone(${s.id})">${s.done ? '↩' : '✓'}</button>
+            <button class="sprawaBtn" title="Ustaw przypomnienie" onclick="openReminderModal('${escapeHtml(s.title).replace(/'/g,"\\'")}')">🔔</button>
+            <button class="sprawaBtn danger" title="Usuń" onclick="deleteSprawa(${s.id})">✕</button>
           </div>
         </div>`;
     }).join('');
@@ -1606,12 +1533,33 @@
       ? (daysLeft(nearest.date) <= 0 ? 'dziś lub po terminie' : `za ${daysLeft(nearest.date)} dni (${formatDate(nearest.date)})`)
       : 'brak';
 
-    stats.innerHTML = `<strong>📊 Statystyki:</strong><br>
-      • Aktywne sprawy: <strong>${active.length}</strong><br>
-      • Przeterminowane: <strong style="color:var(--bad)">${overdue.length}</strong><br>
-      • Termin w ciągu 7 dni: <strong style="color:var(--warn)">${soonCount.length}</strong><br>
-      • Najbliższy termin: <strong>${nearestTxt}</strong><br>
-      • Załatwione łącznie: <strong style="color:var(--good)">${done.length}</strong>`;
+    stats.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px">
+      <div style="padding:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r)">
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.5px">${active.length}</div>
+        <div style="font-size:11px;color:var(--text-secondary)">Aktywne</div>
+      </div>
+      <div style="padding:12px;background:var(--bad-bg);border:1px solid var(--bad-border);border-radius:var(--r)">
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.5px;color:var(--bad)">${overdue.length}</div>
+        <div style="font-size:11px;color:var(--bad)">Po terminie</div>
+      </div>
+      <div style="padding:12px;background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:var(--r)">
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.5px;color:var(--warn)">${soonCount.length}</div>
+        <div style="font-size:11px;color:var(--warn)">W 7 dni</div>
+      </div>
+      <div style="padding:12px;background:var(--good-bg);border:1px solid var(--good-border);border-radius:var(--r)">
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.5px;color:var(--good)">${done.length}</div>
+        <div style="font-size:11px;color:var(--good)">Załatwione</div>
+      </div>
+    </div>`;
+
+    // Re-attach ripple to dynamically rendered buttons
+    if (typeof attachRipple === 'function') {
+      container.querySelectorAll('.sprawaBtn').forEach(attachRipple);
+    }
+    // Stagger animation
+    container.querySelectorAll('.sprawaItem').forEach((el, i) => {
+      el.style.animationDelay = (i * 0.04) + 's';
+    });
   }
 
   // --- Render: Lista w kalendarzu (Najbliższe 30 dni) ---
@@ -1636,7 +1584,7 @@
     const all = [...overdue, ...upcoming];
 
     if (all.length === 0) {
-      container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--muted); font-size:14px">Brak nadchodzących terminów.<br>Dodaj sprawę, żeby zobaczyć je tutaj.</div>`;
+      container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-secondary); font-size:13px">Brak nadchodzących terminów.<br>Dodaj sprawę, żeby zobaczyć je tutaj.</div>`;
       return;
     }
 
@@ -1675,6 +1623,7 @@
     renderSprawyList();
     renderUpcomingList();
     generateCalendar(currentYear, currentMonth);
+    renderLandingStats();
   }
 
   // ============================================================
@@ -2861,19 +2810,73 @@
 
   // === NAWIGACJA MIĘDZY SEKCJAMI ===
   const navLinks = document.querySelectorAll('.navLink');
-  const sections = document.querySelectorAll('.section');
+
+  function showSection(name) {
+    navLinks.forEach(l => l.classList.toggle('active', l.dataset.section === name));
+
+    const homeEl   = document.getElementById('section-home');
+    const sprawyEl = document.getElementById('section-sprawy');
+
+    if (name === 'home') {
+      homeEl.style.display = '';
+      sprawyEl.classList.remove('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (name === 'terminy') {
+      // Pokaż stronę główną (z kalendarzem poniżej) i scrolluj do kalendarza
+      homeEl.style.display = '';
+      sprawyEl.classList.remove('active');
+      setTimeout(() => {
+        document.getElementById('section-terminy').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 30);
+    } else if (name === 'sprawy') {
+      homeEl.style.display = 'none';
+      sprawyEl.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
   
   navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      const sectionName = link.dataset.section;
-      
-      navLinks.forEach(l => l.classList.remove('active'));
-      link.classList.add('active');
-      
-      sections.forEach(s => s.classList.remove('active'));
-      document.getElementById(`section-${sectionName}`).classList.add('active');
-    });
+    link.addEventListener('click', () => showSection(link.dataset.section));
   });
+
+  // Przyciski landing page
+  document.getElementById('landingAddBtn').addEventListener('click', () => {
+    document.getElementById('addCaseOverlay').classList.add('active');
+  });
+  document.getElementById('landingCalBtn').addEventListener('click', () => {
+    showSection('terminy');
+  });
+
+  // Statystyki na landing
+  function renderLandingStats() {
+    const all = loadSprawy();
+    const active = all.filter(s => !s.done);
+    const overdue = active.filter(s => s.date && daysLeft(s.date) < 0);
+    const done = all.filter(s => s.done);
+    const el = document.getElementById('landingStats');
+    if (!el) return;
+    el.innerHTML = `
+      <div class="landingStat">
+        <span class="num">53</span>
+        <span class="lbl">sprawy w bazie</span>
+      </div>
+      <div class="landingStatDivider"></div>
+      <div class="landingStat">
+        <span class="num">${active.length}</span>
+        <span class="lbl">aktywnych spraw</span>
+      </div>
+      <div class="landingStatDivider"></div>
+      <div class="landingStat">
+        <span class="num" style="${overdue.length > 0 ? 'color:var(--bad)' : ''}">${overdue.length}</span>
+        <span class="lbl">po terminie</span>
+      </div>
+      <div class="landingStatDivider"></div>
+      <div class="landingStat">
+        <span class="num" style="color:var(--good)">${done.length}</span>
+        <span class="lbl">załatwionych</span>
+      </div>
+    `;
+  }
 
   // === KALENDARZ ===
   function generateCalendar(year, month) {
@@ -2926,7 +2929,7 @@
   let currentYear = todayDate.getFullYear();
   let currentMonth = todayDate.getMonth();
 
-  // Pierwsze renderowanie
+  // Pierwsze renderowanie — strona główna z kalendarzem poniżej
   refreshAll();
   updateCalendarTitle();
   
@@ -2984,7 +2987,7 @@
     const list = document.getElementById('govLinksList');
     const links = GOV_LINKS[linksKey] || [];
     if (links.length === 0) {
-      list.innerHTML = '<span style="color:var(--muted); font-size:14px; font-style:italic;">Sprawdź stronę gov.pl lub udaj się do właściwego urzędu.</span>';
+      list.innerHTML = '<span style="color:var(--text-secondary); font-size:14px; font-style:italic;">Sprawdź stronę gov.pl lub udaj się do właściwego urzędu.</span>';
       return;
     }
     list.innerHTML = links.map(l => `
@@ -3053,10 +3056,6 @@
   const closeAddCase = document.getElementById('closeAddCase');
   
   // Otwórz modal wyboru sprawy
-  document.getElementById('heroAddBtn').addEventListener('click', () => {
-    addCaseOverlay.classList.add('active');
-  });
-  
   document.getElementById('addNewBtn').addEventListener('click', () => {
     addCaseOverlay.classList.add('active');
   });
@@ -3133,9 +3132,7 @@
     }
   });
   
-  document.getElementById('heroBrowseBtn').addEventListener('click', () => {
-    document.querySelector('[data-section="terminy"]').click();
-  });
+  // heroBrowseBtn no longer exists (removed with old hero), but keep safe fallback
 
   function computeDemoResult(key, checkedCount, checked){
     if(key === 'ubezpieczenie'){
@@ -3166,7 +3163,7 @@
     const card = e.target.closest('.card');
     if(card && card.dataset.calc){
       // Dla kart kalkulatorów - otwórz odpowiednią sekcję
-      document.querySelector('[data-section="kalkulatory"]').click();
+      showSection('sprawy');
     }
   });
 
@@ -3223,7 +3220,7 @@
     overlay.classList.remove('active');
 
     // Pokaż sekcję Moje Sprawy
-    document.querySelector('[data-section="sprawy"]').click();
+    showSection('sprawy');
   });
 
   // Dodaj sprawę z sekcji Moje Sprawy
@@ -3232,19 +3229,23 @@
   });
 
   // Zamknij save panel przy zamknięciu modalu
-  closeModal.addEventListener('click', () => {
-    overlay.classList.remove('active');
-    resetSavePanel();
-  });
+  function closeOverlay(el, extra) {
+    el.classList.add('closing');
+    setTimeout(() => {
+      el.classList.remove('active', 'closing');
+      if (extra) extra();
+    }, 160);
+  }
+
+  closeModal.addEventListener('click', () => closeOverlay(overlay, resetSavePanel));
   overlay.addEventListener('click', (e) => {
-    if(e.target === overlay) { overlay.classList.remove('active'); resetSavePanel(); }
+    if(e.target === overlay) closeOverlay(overlay, resetSavePanel);
   });
 
   window.addEventListener('keydown', (e) => {
     if(e.key === 'Escape') {
-      overlay.classList.remove('active');
+      closeOverlay(overlay, resetSavePanel);
       addCaseOverlay.classList.remove('active');
-      resetSavePanel();
     }
   });
 
@@ -3253,80 +3254,218 @@
       '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
     }[m]));
   }
+
+  /* ── RIPPLE ── */
+  function attachRipple(btn) {
+    btn.addEventListener('click', function(e) {
+      const r = document.createElement('span');
+      r.className = 'ripple';
+      const rect = btn.getBoundingClientRect();
+      r.style.left = (e.clientX - rect.left) + 'px';
+      r.style.top  = (e.clientY - rect.top) + 'px';
+      btn.appendChild(r);
+      r.addEventListener('animationend', () => r.remove());
+    });
+  }
+  document.querySelectorAll(
+    '.btnPrimary, .btnSecondary, .primaryCta, .secondaryCta, .cta, .sprawaBtn'
+  ).forEach(attachRipple);
+
+  /* ═══════════════════════════════════════════════════
+     SYSTEM PRZYPOMNIEŃ
+     ═══════════════════════════════════════════════════ */
+
+  let _reminderCaseTitle = '';
+
+  // Otwieranie modalu przypomnienia
+  function openReminderModal(caseTitle) {
+    _reminderCaseTitle = caseTitle || 'Wybrana sprawa';
+    document.getElementById('reminderCaseLabel').textContent = _reminderCaseTitle;
+    document.getElementById('remSuccess').style.display = 'none';
+    document.getElementById('remDate').value = '';
+    document.getElementById('remTime').value = '';
+    document.getElementById('remEmail').value = '';
+
+    // Ustaw domyślnie jutro
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('remDate').value = tomorrow.toISOString().split('T')[0];
+    document.getElementById('remTime').value = '09:00';
+
+    document.getElementById('reminderOverlay').classList.add('active');
+    attachRipple(document.getElementById('remCreate'));
+    attachRipple(document.getElementById('remCancel'));
+  }
+
+  // Zamknięcie
+  function closeReminderModal() {
+    closeOverlay(document.getElementById('reminderOverlay'));
+  }
+  document.getElementById('closeReminderModal').addEventListener('click', closeReminderModal);
+  document.getElementById('remCancel').addEventListener('click', closeReminderModal);
+  document.getElementById('reminderOverlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('reminderOverlay')) closeReminderModal();
+  });
+
+  // Tworzenie przypomnienia
+  document.getElementById('remCreate').addEventListener('click', async () => {
+    const dateStr = document.getElementById('remDate').value;
+    const timeStr = document.getElementById('remTime').value;
+    const email   = document.getElementById('remEmail').value.trim();
+
+    if (!dateStr || !timeStr) {
+      alert('Wybierz datę i godzinę.'); return;
+    }
+    const dt = new Date(`${dateStr}T${timeStr}:00`);
+    if (isNaN(dt.getTime())) { alert('Nieprawidłowa data/godzina.'); return; }
+    if (dt <= new Date()) { alert('Wybierz datę w przyszłości.'); return; }
+
+    // 1. Powiadomienie przeglądarki
+    await scheduleNotification(_reminderCaseTitle, dt);
+
+    // 2. Plik .ics
+    const ics = buildICS(_reminderCaseTitle, dt);
+    downloadFile('przypomnienie-zalatwione.ics', ics, 'text/calendar');
+
+    // 3. Mailto (opcjonalnie)
+    if (email) {
+      const sub  = encodeURIComponent(`Przypomnienie: ${_reminderCaseTitle}`);
+      const body = encodeURIComponent(`Termin: ${dt.toLocaleString('pl-PL')}\n\nZałatwione — sprawy urzędowe krok po kroku`);
+      setTimeout(() => { window.location.href = `mailto:${email}?subject=${sub}&body=${body}`; }, 500);
+    }
+
+    document.getElementById('remSuccess').style.display = 'block';
+    setTimeout(closeReminderModal, 2200);
+  });
+
+  async function scheduleNotification(title, dt) {
+    if (!('Notification' in window)) return;
+    let perm = Notification.permission;
+    if (perm === 'default') perm = await Notification.requestPermission();
+    if (perm !== 'granted') return;
+    const delay = dt.getTime() - Date.now();
+    if (delay > 0) {
+      setTimeout(() => {
+        try { new Notification('Załatwione', { body: title, icon: '/favicon.ico' }); } catch {}
+      }, delay);
+    }
+  }
+
+  function buildICS(title, dt) {
+    const pad = n => String(n).padStart(2, '0');
+    const stamp = `${dt.getUTCFullYear()}${pad(dt.getUTCMonth()+1)}${pad(dt.getUTCDate())}` +
+                  `T${pad(dt.getUTCHours())}${pad(dt.getUTCMinutes())}${pad(dt.getUTCSeconds())}Z`;
+    const uid = (crypto.randomUUID?.() ?? Date.now() + Math.random()) + '@zalatwione';
+    const esc = s => String(s).replace(/,/g,'\\,').replace(/;/g,'\\;').replace(/\n/g,'\\n');
+    return [
+      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Zalatwione//PL',
+      'BEGIN:VEVENT',
+      `UID:${uid}`,
+      `DTSTAMP:${stamp}`,
+      `DTSTART:${stamp}`,
+      `SUMMARY:${esc(title)}`,
+      `DESCRIPTION:Sprawa urzędowa z aplikacji Załatwione`,
+      'END:VEVENT','END:VCALENDAR'
+    ].join('\r\n');
+  }
+
+  function downloadFile(filename, text, mime) {
+    const blob = new Blob([text], { type: mime || 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // Podpięcie przycisku w modalu sprawy
+  document.getElementById('setReminderBtn').addEventListener('click', () => {
+    const title = document.getElementById('modalTitle')?.textContent || 'Sprawa';
+    openReminderModal(title);
+  });
+
 </script>
 
+<!-- === MODAL PRZYPOMNIENIA === -->
+<div class="overlay" id="reminderOverlay">
+  <div class="modal" style="max-width:440px">
+    <div class="modalHeader">
+      <h2 class="modalTitle">Ustaw przypomnienie</h2>
+      <p class="modalMeta" id="reminderCaseLabel">Dla wybranej sprawy</p>
+      <button class="closeModal" id="closeReminderModal">✕</button>
+    </div>
+    <div class="modalBody">
+
+      <div style="display:grid;gap:14px">
+        <div>
+          <label class="formLabel">Data</label>
+          <input type="date" class="formInput" id="remDate" />
+        </div>
+        <div>
+          <label class="formLabel">Godzina</label>
+          <input type="time" class="formInput" id="remTime" />
+        </div>
+        <div>
+          <label class="formLabel">E-mail (opcjonalnie — otworzy klienta pocztowego)</label>
+          <input type="email" class="formInput" id="remEmail" placeholder="np. ja@domena.pl" />
+        </div>
+      </div>
+
+      <div style="background:var(--muted-bg);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-top:16px;font-size:12px;color:var(--text-secondary);line-height:1.6">
+        <strong style="color:var(--text)">Jak działają przypomnienia?</strong><br>
+        • <strong>Powiadomienie przeglądarki</strong> — działa gdy strona jest otwarta<br>
+        • <strong>Plik .ics</strong> — pobierany automatycznie, możesz dodać do Google/Apple Calendar<br>
+        • <strong>E-mail</strong> — opcjonalnie otwiera klienta poczty z gotową wiadomością
+      </div>
+
+      <div class="modalActions">
+        <button class="btnPrimary" id="remCreate">Utwórz przypomnienie</button>
+        <button class="btnSecondary" id="remCancel">Anuluj</button>
+      </div>
+
+      <div id="remSuccess" style="display:none;margin-top:14px;padding:12px;background:var(--good-bg);border:1px solid var(--good-border);border-radius:var(--r);font-size:13px;color:var(--good)">
+        ✓ Przypomnienie zostało ustawione!
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- === MODAL GENERATORA PDF === -->
-<style>
-  .pdfOverlay{ display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(15,23,42,.75); backdrop-filter:blur(4px); z-index:200; padding:20px; overflow-y:auto; align-items:flex-start; justify-content:center; padding-top:40px; }
-  .pdfOverlay.active{ display:flex; }
-  .pdfModal{ background:var(--modal-bg); border-radius:var(--radius); max-width:680px; width:100%; box-shadow:var(--shadow-lg); position:relative; }
-  .pdfModalHeader{ padding:22px 24px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--modal-header-bg); border-radius:var(--radius) var(--radius) 0 0; z-index:5; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-  .pdfModalHeader h2{ margin:0; font-size:20px; font-weight:800; }
-  .pdfModalBody{ padding:24px; }
-  .pdfTabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; }
-  .pdfTab{ padding:9px 16px; border:2px solid var(--line); border-radius:10px; background:var(--bg); color:var(--muted); font-weight:600; font-size:14px; cursor:pointer; transition:.2s; }
-  .pdfTab:hover{ border-color:var(--accent); color:var(--accent); }
-  .pdfTab.active{ border-color:var(--accent); background:rgba(14,165,233,.08); color:var(--accent); }
-  .pdfForm{ display:none; }
-  .pdfForm.active{ display:block; animation:fadeIn .25s ease; }
-  .pdfFieldGroup{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
-  @media(max-width:560px){ .pdfFieldGroup{ grid-template-columns:1fr; } }
-  .pdfField{ margin-bottom:14px; }
-  .pdfField label{ display:block; font-weight:700; font-size:13px; margin-bottom:6px; color:var(--text); }
-  .pdfField input, .pdfField textarea, .pdfField select{
-    width:100%; border:2px solid var(--line); border-radius:9px;
-    padding:10px 13px; font-size:14px; background:var(--input-bg); color:var(--text);
-    font-family:var(--font); transition:.2s;
-  }
-  .pdfField input:focus, .pdfField textarea:focus, .pdfField select:focus{
-    outline:0; border-color:var(--accent); background:var(--card);
-    box-shadow:0 0 0 3px rgba(14,165,233,.1);
-  }
-  .pdfField textarea{ resize:vertical; min-height:90px; }
-  .pdfHint{ font-size:12px; color:var(--muted); margin-top:5px; line-height:1.4; }
-  .pdfPreviewBox{ background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:16px; font-size:13px; line-height:1.7; color:var(--text); white-space:pre-wrap; margin-bottom:20px; max-height:260px; overflow-y:auto; font-family:Georgia,serif; display:none; }
-  .pdfPreviewBox.visible{ display:block; }
-  .pdfActions{ display:flex; gap:10px; flex-wrap:wrap; padding-top:16px; border-top:1px solid var(--line); }
-  .pdfSuccess{ display:none; text-align:center; padding:24px 16px; }
-  .pdfSuccess .icon{ font-size:52px; margin-bottom:12px; }
-  .pdfSuccess h3{ margin:0 0 8px; font-size:20px; font-weight:800; }
-  .pdfSuccess p{ color:var(--muted); margin:0 0 20px; font-size:15px; }
-</style>
 
 <div class="pdfOverlay" id="pdfOverlay">
   <div class="pdfModal">
     <div class="pdfModalHeader">
-      <h2>📄 Generator dokumentów PDF</h2>
+      <h2>Generator dokumentów PDF</h2>
       <button class="closeModal" id="closePdfModal">✕</button>
     </div>
     <div class="pdfModalBody">
 
       <!-- Zakładki typów dokumentów -->
       <div class="pdfTabs">
-        <button class="pdfTab active" data-form="reklamacja">📝 Reklamacja</button>
-        <button class="pdfTab" data-form="odwolanie">⚖️ Odwołanie</button>
-        <button class="pdfTab" data-form="wypowiedzenie">🏠 Wypowiedzenie najmu</button>
-        <button class="pdfTab" data-form="uzasadnienie">📄 Wniosek o uzasadnienie</button>
+        <button class="pdfTab active" data-form="reklamacja">Reklamacja</button>
+        <button class="pdfTab" data-form="odwolanie">Odwołanie</button>
+        <button class="pdfTab" data-form="wypowiedzenie">Wypowiedzenie najmu</button>
+        <button class="pdfTab" data-form="uzasadnienie">Wniosek o uzasadnienie</button>
       </div>
 
       <!-- === REKLAMACJA === -->
       <div class="pdfForm active" id="form-reklamacja">
         <div class="pdfFieldGroup">
-          <div class="pdfField"><label>Imię i nazwisko *</label><input id="rek-imie" placeholder="Jan Kowalski" /></div>
-          <div class="pdfField"><label>Adres zamieszkania *</label><input id="rek-adres" placeholder="ul. Przykładowa 1, 00-001 Warszawa" /></div>
+          <div class="pdfField"><label class="formLabel">Imię i nazwisko *</label><input class="formInput" id="rek-imie" placeholder="Jan Kowalski" /></div>
+          <div class="pdfField"><label class="formLabel">Adres zamieszkania *</label><input class="formInput" id="rek-adres" placeholder="ul. Przykładowa 1, 00-001 Warszawa" /></div>
         </div>
         <div class="pdfFieldGroup">
-          <div class="pdfField"><label>Sprzedawca / firma *</label><input id="rek-sprzedawca" placeholder="Sklep XYZ sp. z o.o." /></div>
-          <div class="pdfField"><label>Adres sprzedawcy</label><input id="rek-adres-sp" placeholder="ul. Handlowa 5, 00-002 Warszawa" /></div>
+          <div class="pdfField"><label class="formLabel">Sprzedawca / firma *</label><input class="formInput" id="rek-sprzedawca" placeholder="Sklep XYZ sp. z o.o." /></div>
+          <div class="pdfField"><label class="formLabel">Adres sprzedawcy</label><input class="formInput" id="rek-adres-sp" placeholder="ul. Handlowa 5, 00-002 Warszawa" /></div>
         </div>
         <div class="pdfFieldGroup">
-          <div class="pdfField"><label>Produkt / usługa *</label><input id="rek-produkt" placeholder="Laptop Dell Inspiron 15" /></div>
-          <div class="pdfField"><label>Data zakupu *</label><input id="rek-data-zakupu" type="date" /></div>
+          <div class="pdfField"><label class="formLabel">Produkt / usługa *</label><input class="formInput" id="rek-produkt" placeholder="Laptop Dell Inspiron 15" /></div>
+          <div class="pdfField"><label class="formLabel">Data zakupu *</label><input class="formInput" id="rek-data-zakupu" type="date" /></div>
         </div>
-        <div class="pdfField"><label>Opis wady / problemu *</label><textarea id="rek-wada" placeholder="Opisz dokładnie wadę lub niezgodność z umową..."></textarea></div>
+        <div class="pdfField"><label class="formLabel">Opis wady / problemu *</label><textarea class="formInput" id="rek-wada" placeholder="Opisz dokładnie wadę lub niezgodność z umową..."></textarea></div>
         <div class="pdfFieldGroup">
           <div class="pdfField">
-            <label>Żądanie *</label>
+            <label class="formLabel">Żądanie *</label>
             <select id="rek-zadanie">
               <option value="naprawa">Bezpłatna naprawa</option>
               <option value="wymiana">Wymiana na nowy</option>
@@ -3334,48 +3473,48 @@
               <option value="obnizenie">Obniżenie ceny</option>
             </select>
           </div>
-          <div class="pdfField"><label>Data pisma *</label><input id="rek-data-pisma" type="date" /></div>
+          <div class="pdfField"><label class="formLabel">Data pisma *</label><input class="formInput" id="rek-data-pisma" type="date" /></div>
         </div>
-        <div class="pdfField"><label>Numer dokumentu zakupu (paragon/faktura)</label><input id="rek-paragon" placeholder="np. FV/2024/01234" /></div>
+        <div class="pdfField"><label class="formLabel">Numer dokumentu zakupu (paragon/faktura)</label><input class="formInput" id="rek-paragon" placeholder="np. FV/2024/01234" /></div>
       </div>
 
       <!-- === ODWOŁANIE === -->
       <div class="pdfForm" id="form-odwolanie">
         <div class="pdfFieldGroup">
-          <div class="pdfField"><label>Imię i nazwisko *</label><input id="odw-imie" placeholder="Jan Kowalski" /></div>
-          <div class="pdfField"><label>Adres zamieszkania *</label><input id="odw-adres" placeholder="ul. Przykładowa 1, 00-001 Warszawa" /></div>
+          <div class="pdfField"><label class="formLabel">Imię i nazwisko *</label><input class="formInput" id="odw-imie" placeholder="Jan Kowalski" /></div>
+          <div class="pdfField"><label class="formLabel">Adres zamieszkania *</label><input class="formInput" id="odw-adres" placeholder="ul. Przykładowa 1, 00-001 Warszawa" /></div>
         </div>
         <div class="pdfFieldGroup">
-          <div class="pdfField"><label>Organ wydający decyzję *</label><input id="odw-organ" placeholder="Urząd Skarbowy w Warszawie" /></div>
-          <div class="pdfField"><label>Organ odwoławczy *</label><input id="odw-organ2" placeholder="Dyrektor Izby Administracji Skarbowej" /></div>
+          <div class="pdfField"><label class="formLabel">Organ wydający decyzję *</label><input class="formInput" id="odw-organ" placeholder="Urząd Skarbowy w Warszawie" /></div>
+          <div class="pdfField"><label class="formLabel">Organ odwoławczy *</label><input class="formInput" id="odw-organ2" placeholder="Dyrektor Izby Administracji Skarbowej" /></div>
         </div>
         <div class="pdfFieldGroup">
-          <div class="pdfField"><label>Numer decyzji *</label><input id="odw-nr" placeholder="np. US.XII.123.2024" /></div>
-          <div class="pdfField"><label>Data decyzji *</label><input id="odw-data-dec" type="date" /></div>
+          <div class="pdfField"><label class="formLabel">Numer decyzji *</label><input class="formInput" id="odw-nr" placeholder="np. US.XII.123.2024" /></div>
+          <div class="pdfField"><label class="formLabel">Data decyzji *</label><input class="formInput" id="odw-data-dec" type="date" /></div>
         </div>
-        <div class="pdfField"><label>Zarzuty / uzasadnienie odwołania *</label><textarea id="odw-zarzuty" placeholder="Opisz, z czym się nie zgadzasz i dlaczego decyzja jest błędna..."></textarea></div>
-        <div class="pdfField"><label>Żądanie *</label><textarea id="odw-zadanie" placeholder="Wnoszę o uchylenie zaskarżonej decyzji w całości i wydanie decyzji odmiennej..." style="min-height:70px"></textarea></div>
+        <div class="pdfField"><label class="formLabel">Zarzuty / uzasadnienie odwołania *</label><textarea class="formInput" id="odw-zarzuty" placeholder="Opisz, z czym się nie zgadzasz i dlaczego decyzja jest błędna..."></textarea></div>
+        <div class="pdfField"><label class="formLabel">Żądanie *</label><textarea class="formInput" id="odw-zadanie" placeholder="Wnoszę o uchylenie zaskarżonej decyzji w całości i wydanie decyzji odmiennej..." style="min-height:70px"></textarea></div>
         <div class="pdfFieldGroup">
-          <div class="pdfField"><label>Miejscowość *</label><input id="odw-miasto" placeholder="Warszawa" /></div>
-          <div class="pdfField"><label>Data pisma *</label><input id="odw-data-pisma" type="date" /></div>
+          <div class="pdfField"><label class="formLabel">Miejscowość *</label><input class="formInput" id="odw-miasto" placeholder="Warszawa" /></div>
+          <div class="pdfField"><label class="formLabel">Data pisma *</label><input class="formInput" id="odw-data-pisma" type="date" /></div>
         </div>
       </div>
 
       <!-- === WYPOWIEDZENIE NAJMU === -->
       <div class="pdfForm" id="form-wypowiedzenie">
         <div class="pdfFieldGroup">
-          <div class="pdfField"><label>Imię i nazwisko najemcy *</label><input id="wyp-imie" placeholder="Jan Kowalski" /></div>
-          <div class="pdfField"><label>Adres najemcy *</label><input id="wyp-adres-najem" placeholder="ul. Przykładowa 1, 00-001 Warszawa" /></div>
+          <div class="pdfField"><label class="formLabel">Imię i nazwisko najemcy *</label><input class="formInput" id="wyp-imie" placeholder="Jan Kowalski" /></div>
+          <div class="pdfField"><label class="formLabel">Adres najemcy *</label><input class="formInput" id="wyp-adres-najem" placeholder="ul. Przykładowa 1, 00-001 Warszawa" /></div>
         </div>
         <div class="pdfFieldGroup">
-          <div class="pdfField"><label>Imię i nazwisko wynajmującego *</label><input id="wyp-wynajmujacy" placeholder="Anna Nowak" /></div>
-          <div class="pdfField"><label>Adres wynajmującego</label><input id="wyp-adres-wyn" placeholder="ul. Właścicielska 2, 00-002 Warszawa" /></div>
+          <div class="pdfField"><label class="formLabel">Imię i nazwisko wynajmującego *</label><input class="formInput" id="wyp-wynajmujacy" placeholder="Anna Nowak" /></div>
+          <div class="pdfField"><label class="formLabel">Adres wynajmującego</label><input class="formInput" id="wyp-adres-wyn" placeholder="ul. Właścicielska 2, 00-002 Warszawa" /></div>
         </div>
-        <div class="pdfField"><label>Adres wynajmowanego lokalu *</label><input id="wyp-lokal" placeholder="ul. Mieszkalna 3/4, 00-003 Warszawa" /></div>
+        <div class="pdfField"><label class="formLabel">Adres wynajmowanego lokalu *</label><input class="formInput" id="wyp-lokal" placeholder="ul. Mieszkalna 3/4, 00-003 Warszawa" /></div>
         <div class="pdfFieldGroup">
-          <div class="pdfField"><label>Data zawarcia umowy *</label><input id="wyp-data-umowy" type="date" /></div>
+          <div class="pdfField"><label class="formLabel">Data zawarcia umowy *</label><input class="formInput" id="wyp-data-umowy" type="date" /></div>
           <div class="pdfField">
-            <label>Okres wypowiedzenia *</label>
+            <label class="formLabel">Okres wypowiedzenia *</label>
             <select id="wyp-okres">
               <option value="1 miesiąc">1 miesiąc</option>
               <option value="3 miesiące">3 miesiące</option>
@@ -3393,29 +3532,29 @@
             <option value="inne">Inne (wpisz poniżej)</option>
           </select>
         </div>
-        <div class="pdfField"><label>Dodatkowe uwagi / własny powód</label><textarea id="wyp-uwagi" placeholder="Opcjonalnie..." style="min-height:60px"></textarea></div>
+        <div class="pdfField"><label class="formLabel">Dodatkowe uwagi / własny powód</label><textarea class="formInput" id="wyp-uwagi" placeholder="Opcjonalnie..." style="min-height:60px"></textarea></div>
         <div class="pdfFieldGroup">
-          <div class="pdfField"><label>Miejscowość *</label><input id="wyp-miasto" placeholder="Warszawa" /></div>
-          <div class="pdfField"><label>Data pisma *</label><input id="wyp-data-pisma" type="date" /></div>
+          <div class="pdfField"><label class="formLabel">Miejscowość *</label><input class="formInput" id="wyp-miasto" placeholder="Warszawa" /></div>
+          <div class="pdfField"><label class="formLabel">Data pisma *</label><input class="formInput" id="wyp-data-pisma" type="date" /></div>
         </div>
       </div>
 
       <!-- === WNIOSEK O UZASADNIENIE === -->
       <div class="pdfForm" id="form-uzasadnienie">
         <div class="pdfFieldGroup">
-          <div class="pdfField"><label>Imię i nazwisko *</label><input id="uz-imie" placeholder="Jan Kowalski" /></div>
-          <div class="pdfField"><label>Adres zamieszkania *</label><input id="uz-adres" placeholder="ul. Przykładowa 1, 00-001 Warszawa" /></div>
+          <div class="pdfField"><label class="formLabel">Imię i nazwisko *</label><input class="formInput" id="uz-imie" placeholder="Jan Kowalski" /></div>
+          <div class="pdfField"><label class="formLabel">Adres zamieszkania *</label><input class="formInput" id="uz-adres" placeholder="ul. Przykładowa 1, 00-001 Warszawa" /></div>
         </div>
         <div class="pdfFieldGroup">
-          <div class="pdfField"><label>Organ, do którego pismo *</label><input id="uz-organ" placeholder="Urząd Skarbowy w Warszawie" /></div>
-          <div class="pdfField"><label>Numer decyzji / postanowienia *</label><input id="uz-nr" placeholder="np. US.XII.123.2024" /></div>
+          <div class="pdfField"><label class="formLabel">Organ, do którego pismo *</label><input class="formInput" id="uz-organ" placeholder="Urząd Skarbowy w Warszawie" /></div>
+          <div class="pdfField"><label class="formLabel">Numer decyzji / postanowienia *</label><input class="formInput" id="uz-nr" placeholder="np. US.XII.123.2024" /></div>
         </div>
         <div class="pdfFieldGroup">
-          <div class="pdfField"><label>Data decyzji *</label><input id="uz-data-dec" type="date" /></div>
-          <div class="pdfField"><label>Data doręczenia decyzji *</label><input id="uz-data-dor" type="date" /></div>
+          <div class="pdfField"><label class="formLabel">Data decyzji *</label><input class="formInput" id="uz-data-dec" type="date" /></div>
+          <div class="pdfField"><label class="formLabel">Data doręczenia decyzji *</label><input class="formInput" id="uz-data-dor" type="date" /></div>
         </div>
         <div class="pdfField">
-          <label>Cel wniosku *</label>
+          <label class="formLabel">Cel wniosku *</label>
           <select id="uz-cel">
             <option value="ocena zasadności odwołania">Ocena zasadności wniesienia odwołania</option>
             <option value="zapoznanie się z motywami rozstrzygnięcia">Zapoznanie się z motywami rozstrzygnięcia</option>
@@ -3423,8 +3562,8 @@
           </select>
         </div>
         <div class="pdfFieldGroup">
-          <div class="pdfField"><label>Miejscowość *</label><input id="uz-miasto" placeholder="Warszawa" /></div>
-          <div class="pdfField"><label>Data pisma *</label><input id="uz-data-pisma" type="date" /></div>
+          <div class="pdfField"><label class="formLabel">Miejscowość *</label><input class="formInput" id="uz-miasto" placeholder="Warszawa" /></div>
+          <div class="pdfField"><label class="formLabel">Data pisma *</label><input class="formInput" id="uz-data-pisma" type="date" /></div>
         </div>
       </div>
 
@@ -3440,9 +3579,9 @@
       </div>
 
       <div class="pdfActions" id="pdfActions">
-        <button class="btnPrimary" id="pdfPreviewBtn">👁 Podgląd</button>
-        <button class="btnPrimary" id="pdfDownloadBtn" style="background:linear-gradient(135deg,#10b981,#059669)">⬇ Pobierz PDF</button>
-        <button class="btnSecondary" id="pdfClearBtn">🗑 Wyczyść</button>
+        <button class="btnSecondary" id="pdfPreviewBtn">Podgląd</button>
+        <button class="btnPrimary" id="pdfDownloadBtn">Pobierz PDF</button>
+        <button class="btnSecondary" id="pdfClearBtn">Wyczyść</button>
       </div>
 
     </div>
@@ -3469,11 +3608,16 @@ function openPdfGenerator(formKey) {
 }
 
 document.getElementById('closePdfModal').addEventListener('click', () => {
-  document.getElementById('pdfOverlay').classList.remove('active');
+  const el = document.getElementById('pdfOverlay');
+  el.classList.add('closing');
+  setTimeout(() => el.classList.remove('active','closing'), 160);
 });
 document.getElementById('pdfOverlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('pdfOverlay'))
-    document.getElementById('pdfOverlay').classList.remove('active');
+  if (e.target === document.getElementById('pdfOverlay')) {
+    const el = e.target;
+    el.classList.add('closing');
+    setTimeout(() => el.classList.remove('active','closing'), 160);
+  }
 });
 
 // --- Zakładki ---
